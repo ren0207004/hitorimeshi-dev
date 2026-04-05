@@ -170,7 +170,13 @@ function MainApp({user}){
   const[expandedItem,setExpandedItem]=useState(null);
   const fileRef=useRef();
 
-  const setFridge=v=>{const clean=(v||[]).filter(i=>i&&i.name&&i.expiry);setFridgeState(clean);sv("fridge",clean);};
+  const setFridge=v=>{
+    if(typeof v==="function"){
+      setFridgeState(prev=>{const next=v(prev);const clean=(next||[]).filter(i=>i&&i.name&&i.expiry);sv("fridge",clean);return clean;});
+    }else{
+      const clean=(v||[]).filter(i=>i&&i.name&&i.expiry);setFridgeState(clean);sv("fridge",clean);
+    }
+  };
   const setSettings=v=>{setSettingsState(v);sv("settings",v);};
   const setFavorites=v=>{setFavoritesState(v);sv("favorites",v);};
   const addToHistory=recipes=>{const entry={id:Date.now(),date:new Date().toLocaleDateString("ja-JP"),recipes};const h=[entry,...recipeHistory].slice(0,30);setRecipeHistory(h);sv("recipeHistory",h);};
@@ -247,6 +253,35 @@ function MainApp({user}){
     setFridge([...fridge,...newItems]);setScanData(null);
   };
 
+  const genRecipeWithIds=async(ids,fridgeData)=>{
+    const chosen=(fridgeData||fridge).filter(i=>ids.has(i.id));
+    if(!chosen.length)return;
+    setGenerating(true);setRecipeErr("");setRecipe(null);setPendingRecipe(null);
+    const fridgeSnapshot=fridgeData||[...fridge];
+    try{
+      const{maxTime,dishCount,spiceLevel,cookStyle,riceSize}=settings;
+      const dn=dishCount==="少なめ"?"できるだけ少ない調理器具で":dishCount==="多くてもOK"?"洗い物は気にしない":"洗い物は普通程度で";
+      const styleGuide=cookStyle==="何でも"?"デフォルトは和食（煮物・炒め物・丼・汁物など）を優先。前回と異なるジャンルにすること":cookStyle+"を優先";
+      const ingredientList=chosen.map(i=>`${i.name}(在庫${i.qty}個)`).join(", ");
+      const p=`食材: ${ingredientList}。1人分のレシピを1つ提案。条件: ${maxTime}分以内、${dn}、味は${spiceLevel}、ご飯の量は${riceSize}、${styleGuide}。
+ご飯の量に合わせて各食材の適切な使用個数をAIが判断。在庫数を超えないこと。
+食欲をそそる魅力的な説明文にすること。
+JSONのみ返答: {"name":"料理名","emoji":"🍳","time":"15分","difficulty":"簡単","description":"食欲をそそる説明（30文字程度）","calories":"400kcal","protein":"15g","carbs":"50g","fat":"10g","estimatedCost":180,"steps":["手順1","手順2"],"missing":[],"tip":"コツ","dishes":"使う調理器具","usedQty":{"食材名":使用個数}}
+estimatedCostは食材費の概算（円）を必ず含めること。`;
+      const resp=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:"日本語でJSONのみで返答。マークダウン不要。",messages:[{role:"user",content:p}]})});
+      if(!resp.ok){const t=await resp.text();setRecipeErr("APIエラー("+resp.status+"): "+t.slice(0,80));return;}
+      const data=await resp.json();
+      const rawText=(data.content||[]).map(b=>b.text||"").join("");
+      const parsed=xj(rawText);
+      if(!parsed){setRecipeErr("パースエラー。もう一度試してください。");return;}
+      const r=Array.isArray(parsed)?parsed[0]:parsed;
+      setRecipe(r);setRecipeTab("作り方");setShopChk(new Set());
+      setPendingRecipe({recipe:r,chosenIds:ids,fridgeSnapshot});
+      addToHistory([r]);setSelIds(new Set());
+    }catch(e){setRecipeErr("エラー: "+e.message);}
+    finally{setGenerating(false);}
+  };
+
   const genRecipe=async()=>{
     const chosen=fridge.filter(i=>selIds.has(i.id));
     if(!chosen.length)return;
@@ -270,7 +305,8 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
       if(!parsed){setRecipeErr("パースエラー。もう一度試してください。");return;}
       const r=Array.isArray(parsed)?parsed[0]:parsed;
       setRecipe(r);setRecipeTab("作り方");setShopChk(new Set());
-      setPendingRecipe({recipe:r,chosenIds:new Set(selIds),fridgeSnapshot});
+      const chosenIdsCopy=new Set(selIds);
+      setPendingRecipe({recipe:r,chosenIds:chosenIdsCopy,fridgeSnapshot});
       addToHistory([r]);setSelIds(new Set());
     }catch(e){setRecipeErr("エラー: "+e.message);}
     finally{setGenerating(false);}
@@ -293,10 +329,23 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
   };
 
   const cancelCook=()=>{
+    // やめた: restore fridge, clear recipe
     setFridge(pendingRecipe.fridgeSnapshot);
     setPendingRecipe(null);
     setRecipe(null);
-    genRecipe();
+  };
+
+  const nextRecipe=async()=>{
+    // 別のレシピ: regenerate with same ingredients (restore fridge first)
+    const chosenIds=pendingRecipe.chosenIds;
+    const snap=pendingRecipe.fridgeSnapshot;
+    setFridge(snap);
+    setPendingRecipe(null);
+    setRecipe(null);
+    // Re-select same ids
+    setSelIds(new Set(chosenIds));
+    // Small delay then generate
+    setTimeout(()=>genRecipeWithIds(chosenIds,snap),100);
   };
 
   const btnStyle=(on)=>({flex:1,padding:"9px",background:on?A:"transparent",border:"none",borderRadius:10,color:on?"#fff":MU,fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",transition:"all .2s"});
@@ -475,14 +524,19 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                 )}
               </div>
 
-              {/* 作った！/ 次のレシピ */}
+              {/* 作った！/ 別のレシピ / やめた */}
               {pendingRecipe&&(
-                <div style={{display:"flex",gap:8,paddingBottom:20}}>
-                  <button onClick={confirmCook} style={{flex:2,padding:"14px",background:GN,border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
-                    ✅ 作った！
-                  </button>
-                  <button onClick={cancelCook} style={{flex:1,padding:"14px",background:CD,border:"1px solid #3A3835",borderRadius:12,color:MU,fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
-                    次へ 🔄
+                <div style={{paddingBottom:20}}>
+                  <div style={{display:"flex",gap:8,marginBottom:8}}>
+                    <button onClick={confirmCook} style={{flex:2,padding:"14px",background:GN,border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
+                      ✅ 作った！
+                    </button>
+                    <button onClick={nextRecipe} disabled={generating} style={{flex:1,padding:"14px",background:generating?"#2A2927":A,border:"none",borderRadius:12,color:generating?MU:"#fff",fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:generating?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+                      {generating?<span style={{width:14,height:14,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>:"🔄"}{generating?"":"別のレシピ"}
+                    </button>
+                  </div>
+                  <button onClick={cancelCook} style={{width:"100%",padding:"10px",background:"transparent",border:"none",color:MU,fontSize:12,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",opacity:.7}}>
+                    今日はやめておく
                   </button>
                 </div>
               )}
@@ -584,13 +638,13 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                 const isExpanded=expandedItem===it.id;
                 return(
                   <div key={it.id} style={{position:"relative",marginBottom:8,borderRadius:12,overflow:"hidden"}}>
-                    <div style={{position:"absolute",right:0,top:0,bottom:0,width:80,background:RD,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"0 12px 12px 0"}}>
+                    <div style={{position:"absolute",right:0,top:0,bottom:0,width:80,background:(swipeState[it.id]||0)<-80?RD:"#7A2222",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"0 12px 12px 0",transition:"background .2s"}}>
                       <span style={{color:"#fff",fontSize:22}}>🗑</span>
                     </div>
                     <div style={{background:SF,borderRadius:12,border:"1px solid #2A2927",overflow:"hidden",transform:`translateX(${Math.min(0,swipeState[it.id]||0)}px)`,transition:swipeState[it.id]===undefined?"transform .2s":"none",touchAction:"pan-y"}}
                       onTouchStart={e=>{const x=e.touches[0].clientX;setSwipeState(s=>({...s,[it.id+"_start"]:x}));}}
-                      onTouchMove={e=>{const start=swipeState[it.id+"_start"]||0;const dx=e.touches[0].clientX-start;if(dx<0)setSwipeState(s=>({...s,[it.id]:dx}));}}
-                      onTouchEnd={()=>{const offset=swipeState[it.id]||0;if(offset<-60){setFridge(fridge.filter(i=>i.id!==it.id));}setSwipeState(s=>({...s,[it.id]:0,[it.id+"_start"]:0}));}}>
+                      onTouchMove={e=>{const start=swipeState[it.id+"_start"]||0;const dx=e.touches[0].clientX-start;if(dx<0)setSwipeState(s=>({...s,[it.id]:Math.max(dx,-160)}));}}
+                      onTouchEnd={()=>{const offset=swipeState[it.id]||0;if(offset<-120){setFridge(fridge.filter(i=>i.id!==it.id));}setSwipeState(s=>({...s,[it.id]:0,[it.id+"_start"]:0}));}}>
                       {/* メイン行 */}
                       <div onClick={()=>setExpandedItem(isExpanded?null:it.id)} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",cursor:"pointer"}}>
                         <div style={{flex:1}}>
@@ -618,7 +672,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                             <div style={{display:"flex",gap:4,flex:1}}>
                               {["冷蔵","冷凍","常温"].map(s=>(
                                 <button key={s} onClick={e=>{e.stopPropagation();
-                                  setFridge(f=>f.map(i=>{
+                                  setFridge(prev=>prev.map(i=>{
                                     if(i.id!==it.id)return i;
                                     let expiry=i.expiry;
                                     if(s==="冷凍"&&(i.storage||"冷蔵")!=="冷凍"){const rem=daysTo(i.expiry);const d=new Date();d.setDate(d.getDate()+rem*5);expiry=d.toISOString().split("T")[0];}
@@ -639,12 +693,12 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                               onClick={e=>e.stopPropagation()}
                               style={{flex:1,background:CD,border:"1px solid #3A3835",borderRadius:8,padding:"7px 10px",color:TX,fontSize:13,outline:"none"}}/>
                             {editingExpiry?.id===it.id&&(
-                              <button onClick={e=>{e.stopPropagation();setFridge(f=>f.map(i=>i.id===it.id?{...i,expiry:editingExpiry.expiry}:i));setEditingExpiry(null);}}
+                              <button onClick={e=>{e.stopPropagation();setFridge(prev=>prev.map(i=>i.id===it.id?{...i,expiry:editingExpiry.expiry}:i));setEditingExpiry(null);}}
                                 style={{background:A,border:"none",borderRadius:8,padding:"7px 12px",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",whiteSpace:"nowrap"}}>保存</button>
                             )}
                           </div>
                           {/* 削除 */}
-                          <button onClick={e=>{e.stopPropagation();setFridge(fridge.filter(i=>i.id!==it.id));setExpandedItem(null);}} style={{width:"100%",marginTop:10,padding:"8px",background:"transparent",border:"1px solid "+RD+"44",borderRadius:8,color:RD,fontSize:12,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer"}}>削除する</button>
+                          <button onClick={e=>{e.stopPropagation();setFridge(prev=>prev.filter(i=>i.id!==it.id));setExpandedItem(null);}} style={{width:"100%",marginTop:10,padding:"8px",background:"transparent",border:"1px solid "+RD+"44",borderRadius:8,color:RD,fontSize:12,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer"}}>削除する</button>
                         </div>
                       )}
                     </div>
