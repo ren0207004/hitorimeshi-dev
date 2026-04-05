@@ -14,6 +14,13 @@ const fbApp = initializeApp(firebaseConfig);
 const auth = getAuth(fbApp);
 
 const A="#FF6B35",BG="#0F0E0C",SF="#1A1916",CD="#232220",TX="#F5F0E8",MU="#6B6760",GN="#4CAF7D",YW="#FFB830",RD="#FF5555",BL="#4A9EFF";
+const IS_BETA=true;
+const BETA_VERSION="0.3.0";
+const CHANGELOG=[
+  {version:"0.3.0",date:"2026/04/06",changes:["レシピ起点のUI設計に変更","節約額表示を追加（コンビニ・外食・デリバリー比較）","累計・月間節約額をヘッダーに常時表示","「別のレシピ」で同じ食材から即再生成","「今日はやめておく」を追加","スワイプ削除の閾値を120pxに変更・振動フィードバック追加","食材のタップ展開で個数・保存場所・期限を編集可能に","賞味期限アラートからワンタップでレシピ生成"]},
+  {version:"0.2.0",date:"2026/04/05",changes:["ユーザーごとのデータ分離（Upstash Redis）","新規ユーザー登録機能","レシピ提案数の選択（1〜3個）","レシピ履歴・お気に入り機能","作った！/やめた ボタン","食材の保存場所カテゴリ（冷蔵・冷凍・常温）","スワイプ削除","賞味期限の通知"]},
+  {version:"0.1.0",date:"2026/04/02",changes:["初回リリース","Firebase認証","レシートスキャン","レシピ生成","賞味期限管理"]}
+];
 const DS={maxTime:30,dishCount:"少なめ",spiceLevel:"普通",cookStyle:"何でも",riceSize:"普通"};
 const CONVENIENCE_PRICE=598,RESTAURANT_PRICE=880,DELIVERY_PRICE=1200;
 
@@ -146,6 +153,10 @@ function MainApp({user}){
   const[showSettings,setShowSettings]=useState(false);
   const[showReset,setShowReset]=useState(false);
   const[showHistory,setShowHistory]=useState(false);
+  const[showChangelog,setShowChangelog]=useState(()=>{
+    const seen=localStorage.getItem("seenVersion");
+    return IS_BETA&&seen!==BETA_VERSION;
+  });
   const[showExpiryAlert,setShowExpiryAlert]=useState(false);
   const[expiryAlert,setExpiryAlert]=useState([]);
   const[scanning,setScanning]=useState(false);
@@ -357,11 +368,11 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
       {/* Header */}
       <div style={{padding:"18px 20px 14px",borderBottom:"1px solid #2A2927",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative"}}>
         <div>
-          <div style={{display:"flex",alignItems:"baseline",gap:6}}>
+          <div style={{display:"flex",alignItems:"baseline",gap:8}}>
             <span style={{fontSize:22,fontWeight:800,letterSpacing:-1,color:A}}>ひとり</span>
             <span style={{fontSize:22,fontWeight:800,letterSpacing:-1}}>めし</span>
+            {IS_BETA&&<span onClick={()=>setShowChangelog(true)} style={{fontSize:10,color:YW,background:YW+"22",border:"1px solid "+YW+"44",padding:"2px 7px",borderRadius:10,cursor:"pointer",letterSpacing:.5}}>β {BETA_VERSION}</span>}
           </div>
-          {/* 月間節約額 */}
           {monthSaved.amount>0&&(
             <div style={{fontSize:11,color:GN,marginTop:2,fontFamily:"'Noto Sans JP',sans-serif"}}>
               💰 今月の節約額 <span style={{fontWeight:700,fontSize:13}}>¥{monthSaved.amount.toLocaleString()}</span>
@@ -643,7 +654,19 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                     </div>
                     <div style={{background:SF,borderRadius:12,border:"1px solid #2A2927",overflow:"hidden",transform:`translateX(${Math.min(0,swipeState[it.id]||0)}px)`,transition:swipeState[it.id]===undefined?"transform .2s":"none",touchAction:"pan-y"}}
                       onTouchStart={e=>{const x=e.touches[0].clientX;setSwipeState(s=>({...s,[it.id+"_start"]:x}));}}
-                      onTouchMove={e=>{const start=swipeState[it.id+"_start"]||0;const dx=e.touches[0].clientX-start;if(dx<0)setSwipeState(s=>({...s,[it.id]:Math.max(dx,-160)}));}}
+                      onTouchMove={e=>{
+                      const start=swipeState[it.id+"_start"]||0;
+                      const dx=e.touches[0].clientX-start;
+                      if(dx<0){
+                        const prev=swipeState[it.id]||0;
+                        const next=Math.max(dx,-160);
+                        // Vibrate when crossing delete threshold
+                        if(prev>-120&&next<=-120&&navigator.vibrate){
+                          navigator.vibrate(10);
+                        }
+                        setSwipeState(s=>({...s,[it.id]:next}));
+                      }
+                    }}
                       onTouchEnd={()=>{const offset=swipeState[it.id]||0;if(offset<-120){setFridge(fridge.filter(i=>i.id!==it.id));}setSwipeState(s=>({...s,[it.id]:0,[it.id+"_start"]:0}));}}>
                       {/* メイン行 */}
                       <div onClick={()=>setExpandedItem(isExpanded?null:it.id)} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",cursor:"pointer"}}>
@@ -805,6 +828,41 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
             <Seg label="🧂 味の濃さ" options={["薄め","普通","濃いめ"]} value={settings.spiceLevel} onChange={v=>setSettings({...settings,spiceLevel:v})}/>
             <Seg label="🔥 調理スタイル" options={["何でも","炒め物","煮物","レンジ"]} value={settings.cookStyle} onChange={v=>setSettings({...settings,cookStyle:v})}/>
             <button onClick={()=>setSettings({...DS})} style={{width:"100%",marginTop:4,padding:11,background:"transparent",border:"1px solid #3A3835",borderRadius:10,color:MU,fontSize:13,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>デフォルトに戻す</button>
+          </div>
+        </div>
+      )}
+
+      {/* Changelog Modal */}
+      {showChangelog&&(
+        <div onClick={()=>{localStorage.setItem("seenVersion",BETA_VERSION);setShowChangelog(false);}} style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+          <div onClick={e=>e.stopPropagation()} style={{background:BG,borderRadius:"20px 20px 0 0",padding:"24px 20px 40px",width:"100%",maxWidth:480,border:"1px solid "+YW+"44",animation:"fadeUp .25s ease",maxHeight:"85vh",overflowY:"auto"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+              <div>
+                <span style={{fontSize:15,fontWeight:700}}>📋 アップデート情報</span>
+                <span style={{fontSize:11,color:YW,background:YW+"22",border:"1px solid "+YW+"44",padding:"2px 8px",borderRadius:10,marginLeft:8}}>β版</span>
+              </div>
+              <button onClick={()=>{localStorage.setItem("seenVersion",BETA_VERSION);setShowChangelog(false);}} style={{background:"none",border:"none",color:MU,fontSize:22,cursor:"pointer"}}>×</button>
+            </div>
+            <p style={{fontSize:11,color:MU,marginBottom:20,fontFamily:"'Noto Sans JP',sans-serif"}}>β版のため機能が変更・追加されることがあります</p>
+            {CHANGELOG.map((log,li)=>(
+              <div key={li} style={{marginBottom:20}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                  <span style={{fontSize:13,fontWeight:700,color:li===0?A:TX}}>v{log.version}</span>
+                  {li===0&&<span style={{fontSize:10,color:A,background:A+"22",padding:"2px 8px",borderRadius:10}}>最新</span>}
+                  <span style={{fontSize:11,color:MU,marginLeft:"auto"}}>{log.date}</span>
+                </div>
+                {log.changes.map((c,ci)=>(
+                  <div key={ci} style={{display:"flex",gap:8,padding:"6px 0",borderBottom:"1px solid #2A2927"}}>
+                    <span style={{color:li===0?GN:MU,fontSize:12,flexShrink:0}}>•</span>
+                    <span style={{fontSize:13,color:li===0?TX:MU,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.5}}>{c}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+            <button onClick={()=>{localStorage.setItem("seenVersion",BETA_VERSION);setShowChangelog(false);}}
+              style={{width:"100%",padding:"13px",background:A,border:"none",borderRadius:12,color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",marginTop:8}}>
+              確認しました
+            </button>
           </div>
         </div>
       )}
