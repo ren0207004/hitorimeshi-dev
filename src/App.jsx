@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 
-// Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyD09A_IUArbdXZO6F9DutJigFOi9hpxBa0",
   authDomain: "hitorimeshi-a.firebaseapp.com",
@@ -14,284 +13,83 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const auth = getAuth(fbApp);
 
-// Colors
-const A = "#FF6B35", BG = "#0F0E0C", SF = "#1A1916", CD = "#232220";
-const TX = "#F5F0E8", MU = "#6B6760", GN = "#4CAF7D", YW = "#FFB830";
-const RD = "#FF5555", BL = "#4A9EFF";
+const A="#FF6B35",BG="#0F0E0C",SF="#1A1916",CD="#232220",TX="#F5F0E8",MU="#6B6760",GN="#4CAF7D",YW="#FFB830",RD="#FF5555",BL="#4A9EFF";
+const DS={maxTime:30,dishCount:"少なめ",spiceLevel:"普通",cookStyle:"何でも",riceSize:"普通"};
+const CONVENIENCE_PRICE=598,RESTAURANT_PRICE=880,DELIVERY_PRICE=1200;
 
-const EM = {
-  // 肉類
-  "鶏肉":3,"鶏むね":3,"鶏もも":3,"鶏ささみ":3,"鶏皮":3,"手羽":3,
-  "豚肉":3,"豚バラ":3,"豚ロース":3,"豚こま":3,"豚ひれ":3,
-  "牛肉":3,"牛バラ":3,"牛ロース":3,"和牛":3,
-  "ひき肉":2,"合い挽き":2,"鶏ひき":2,"豚ひき":2,"牛ひき":2,
-  "ミンチ":2,"レバー":2,"ホルモン":2,
-  // 魚介類
-  "魚":2,"刺身":1,"さしみ":1,"刺し身":1,
-  "サーモン":2,"鮭":3,"サバ":2,"さば":2,"アジ":2,"あじ":2,
-  "マグロ":1,"まぐろ":1,"ブリ":2,"ぶり":2,"タイ":2,"たい":2,
-  "エビ":2,"えび":2,"イカ":2,"いか":2,"タコ":3,"たこ":3,
-  "ホタテ":2,"はまぐり":1,"あさり":2,"シジミ":2,"かき":2,
-  "ツナ":1095,"缶詰":365,
-  // 加工肉
-  "ベーコン":7,"ハム":7,"ウインナー":7,"ソーセージ":7,
-  "サラミ":14,"コンビーフ":3,
-  // 乳製品・卵
-  "牛乳":7,"ミルク":7,"豆乳":7,
-  "卵":21,"たまご":21,"玉子":21,
-  "チーズ":14,"スライスチーズ":14,"クリームチーズ":14,
-  "バター":30,"マーガリン":30,
-  "ヨーグルト":14,"生クリーム":7,"ホイップ":7,
-  // 豆腐・大豆製品
-  "豆腐":4,"絹豆腐":4,"木綿豆腐":4,"絹ごし":4,
-  "厚揚げ":4,"油揚げ":5,"がんも":4,"豆腐":4,
-  "納豆":7,"おから":3,"湯葉":3,
-  // 野菜
-  "レタス":5,"サラダ菜":4,"水菜":5,"春菊":4,"ほうれん草":4,"小松菜":4,
-  "キャベツ":14,"紫キャベツ":14,"白菜":14,"チンゲン菜":5,
-  "ねぎ":7,"長ねぎ":7,"小ねぎ":5,"万能ねぎ":5,"わけぎ":5,
-  "玉ねぎ":30,"新玉ねぎ":10,"赤玉ねぎ":30,
-  "にんじん":21,"大根":14,"かぶ":7,"ごぼう":14,"れんこん":14,
-  "じゃがいも":30,"さつまいも":30,"里芋":14,"山芋":14,"長芋":14,
-  "トマト":5,"ミニトマト":7,"プチトマト":7,
-  "きゅうり":5,"なす":5,"ズッキーニ":5,"オクラ":3,
-  "ピーマン":7,"パプリカ":10,"唐辛子":7,
-  "ブロッコリー":5,"カリフラワー":7,"アスパラ":4,"セロリ":7,
-  "もやし":3,"豆もやし":3,"枝豆":3,
-  "しめじ":5,"えのき":5,"しいたけ":5,"まいたけ":5,"エリンギ":7,"なめこ":5,
-  "アボカド":3,"コーン":3,"とうもろこし":3,
-  "生姜":14,"しょうが":14,"にんにく":30,"ガーリック":30,
-  // 果物
-  "いちご":4,"苺":4,"バナナ":5,"りんご":14,"みかん":14,
-  "オレンジ":14,"グレープフルーツ":14,"レモン":14,"ライム":14,
-  "ぶどう":5,"桃":4,"もも":4,"梨":7,"なし":7,"柿":7,
-  "キウイ":7,"メロン":5,"スイカ":5,"パイナップル":5,
-  // 練り物・加工食品
-  "かまぼこ":7,"ちくわ":7,"はんぺん":4,"さつま揚げ":4,
-  "こんにゃく":7,"しらたき":7,
-  // 惣菜・調理済み
-  "惣菜":2,"弁当":1,"おにぎり":1,"サラダ":2,"揚げ物":2,"から揚げ":2,
-  // パン・麺
-  "食パン":5,"パン":4,"バゲット":2,"ベーグル":3,
-  "生麺":3,"うどん":3,"そば":3,"ラーメン":3,"パスタ":3,
-  // その他
-  "もずく":14,"わかめ":14,"昆布":30,"のり":180,
-  "漬物":14,"キムチ":30,"梅干し":365,
-  "味噌":90,"みそ":90,
-};
-const DS = {maxTime:30,dishCount:"少なめ",spiceLevel:"普通",cookStyle:"何でも",riceSize:"普通"};
+const EM={"鶏肉":3,"鶏むね":3,"鶏もも":3,"豚肉":3,"豚バラ":3,"牛肉":3,"ひき肉":2,"合い挽き":2,"魚":2,"刺身":1,"サーモン":2,"マグロ":1,"ベーコン":7,"ハム":7,"ウインナー":7,"ソーセージ":7,"牛乳":7,"豆腐":4,"卵":21,"チーズ":14,"バター":30,"ヨーグルト":14,"生クリーム":7,"レタス":5,"キャベツ":14,"ほうれん草":4,"小松菜":4,"ねぎ":7,"長ねぎ":7,"玉ねぎ":30,"にんじん":21,"じゃがいも":30,"トマト":5,"きゅうり":5,"なす":5,"ピーマン":7,"ブロッコリー":5,"もやし":3,"白菜":14,"しめじ":5,"えのき":5,"しいたけ":5,"まいたけ":5,"納豆":7,"こんにゃく":7,"油揚げ":5,"厚揚げ":4,"エビ":2,"イカ":2,"アジ":2,"サバ":2,"ブリ":2,"ホタテ":2,"あさり":2,"ツナ":1095};
 
-function predExp(name, pd) {
-  const d = new Date(pd); let days = 7;
-  for (const [k,v] of Object.entries(EM)) { if (name.includes(k)) { days=v; break; } }
-  d.setDate(d.getDate()+days);
-  return d.toISOString().split("T")[0];
-}
-function daysTo(exp) { const n=new Date(); n.setHours(0,0,0,0); return Math.ceil((new Date(exp)-n)/86400000); }
-function ec(d) { return d<=1?RD:d<=3?YW:GN; }
-function el(d) { return d<0?"期限切れ":d===0?"今日まで":d+"日後"; }
-function xj(t) {
-  try { return JSON.parse(t.trim()); } catch(_) {}
-  const s = t.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim();
-  try { return JSON.parse(s); } catch(_) {}
-  const a=t.indexOf("{"),b=t.lastIndexOf("}");
-  if(a>=0&&b>=0) { try { return JSON.parse(t.slice(a,b+1)); } catch(_) {} }
-  return null;
-}
-function sv(k,v) { try { localStorage.setItem(k,JSON.stringify(v)); } catch(e) {} }
-function ld(k,d) { try { const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch(e) { return d; } }
+function predExp(name,pd){const d=new Date(pd);let days=7;for(const[k,v]of Object.entries(EM)){if(name.includes(k)){days=v;break;}}d.setDate(d.getDate()+days);return d.toISOString().split("T")[0];}
+function daysTo(exp){const n=new Date();n.setHours(0,0,0,0);return Math.ceil((new Date(exp)-n)/86400000);}
+function ec(d){return d<=1?RD:d<=3?YW:GN;}
+function el(d){return d<0?"期限切れ":d===0?"今日まで":d+"日後";}
+function xj(t){try{return JSON.parse(t.trim());}catch(_){}const s=t.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim();try{return JSON.parse(s);}catch(_){}const a=t.indexOf("["),b=t.lastIndexOf("]");if(a>=0&&b>=0){try{return JSON.parse(t.slice(a,b+1));}catch(_){}}const c=t.indexOf("{"),dd=t.lastIndexOf("}");if(c>=0&&dd>=0){try{return JSON.parse(t.slice(c,dd+1));}catch(_){}}return null;}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function ld(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+async function cloudGet(uid,key,def){return def;}
+async function cloudSet(uid,key,value){}
 
-// Cloud sync helpers (dev: no-op)
-async function cloudGet(uid, key, def) { return def; }
-async function cloudSet(uid, key, value) {}
-
-// ---- Segment Control ----
-function Seg({label, options, value, onChange}) {
-  return (
+function Seg({label,options,value,onChange}){
+  return(
     <div style={{marginBottom:20}}>
       <p style={{fontSize:12,color:MU,marginBottom:8}}>{label}</p>
       <div style={{display:"flex",gap:4,background:CD,borderRadius:10,padding:4}}>
-        {options.map(o => (
-          <button key={o} onClick={()=>onChange(o)} style={{flex:1,padding:"8px 4px",background:value===o?SF:"transparent",border:value===o?"1px solid #3A3835":"1px solid transparent",borderRadius:7,color:value===o?TX:MU,fontSize:12,fontWeight:value===o?700:400,fontFamily:"'Syne',sans-serif",cursor:"pointer",transition:"all .15s"}}>
-            {o}
-          </button>
+        {options.map(o=>(
+          <button key={o} onClick={()=>onChange(o)} style={{flex:1,padding:"8px 4px",background:value===o?SF:"transparent",border:value===o?"1px solid #3A3835":"1px solid transparent",borderRadius:7,color:value===o?TX:MU,fontSize:12,fontWeight:value===o?700:400,fontFamily:"'Syne',sans-serif",cursor:"pointer",transition:"all .15s"}}>{o}</button>
         ))}
       </div>
     </div>
   );
 }
 
-// ---- Login Screen ----
-function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState("");
-  const [showSignup, setShowSignup] = useState(false);
-
-  const doLogin = async () => {
-    if (!email || !pass) { setErr("メールアドレスとパスワードを入力してください"); return; }
-    setLoading(true); setErr("");
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-    } catch(e) {
-      const m = {"auth/invalid-credential":"メールアドレスまたはパスワードが間違っています","auth/invalid-email":"メールアドレスの形式が正しくありません","auth/too-many-requests":"しばらく待ってから試してください","auth/network-request-failed":"ネットワークエラーです"};
-      setErr(m[e.code] || "ログインに失敗しました ("+e.code+")");
-    } finally { setLoading(false); }
-  };
-
-  const inputStyle = {width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"};
-
-  return (
-    <div style={{minHeight:"100vh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 24px"}}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;}::placeholder{color:#3A3835;}@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes modalIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}`}</style>
-      <div style={{width:"100%",maxWidth:360,animation:"fadeUp .5s ease",fontFamily:"'Syne',sans-serif",color:TX}}>
-        <div style={{textAlign:"center",marginBottom:48}}>
-          <div style={{fontSize:44,marginBottom:12}}>🍳</div>
-          <h1 style={{fontSize:34,fontWeight:800,letterSpacing:-1.5}}><span style={{color:A}}>ひとり</span>めし</h1>
-          <p style={{fontSize:11,color:MU,marginTop:8,letterSpacing:2,textTransform:"uppercase"}}>1人分レシピ &amp; 冷蔵庫管理</p>
-        </div>
-
-        <div style={{marginBottom:14}}>
-          <label htmlFor="login-email" style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>メールアドレス</label>
-          <input id="login-email" type="email" value={email} onChange={e=>setEmail(e.target.value)}
-            onKeyDown={e=>e.key==="Enter"&&document.getElementById("login-pass")?.focus()}
-            placeholder="example@mail.com" inputMode="email" autoComplete="email" style={inputStyle}/>
-        </div>
-        <div style={{marginBottom:14}}>
-          <label htmlFor="login-pass" style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>パスワード</label>
-          <input id="login-pass" type="password" value={pass} onChange={e=>setPass(e.target.value)}
-            onKeyDown={e=>e.key==="Enter"&&doLogin()}
-            placeholder="••••••••" autoComplete="current-password" style={inputStyle}/>
-        </div>
-
-        <button onClick={doLogin} disabled={loading} aria-busy={loading}
-          style={{width:"100%",padding:16,background:loading?"#2A2927":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:24}}>
-          {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>ログイン中…</>:"ログイン"}
-        </button>
-
-        {err && <div role="alert" style={{background:"rgba(255,85,85,.1)",border:"1px solid rgba(255,85,85,.3)",borderRadius:10,padding:"12px 14px",fontSize:13,color:RD,fontFamily:"'Noto Sans JP',sans-serif",marginTop:14,lineHeight:1.5}}>{err}</div>}
-
-        <div style={{textAlign:"center",marginTop:24}}>
-          <button onClick={()=>setShowSignup(true)}
-            style={{background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",textDecoration:"underline"}}>
-            アカウントをお持ちでない方はこちら
-          </button>
-        </div>
-      </div>
-
-      {showSignup && <SignupModal onClose={()=>setShowSignup(false)}/>}
-    </div>
-  );
-}
-
-// ---- Signup Modal ----
-function SignupModal({ onClose }) {
-  const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
-  const [passConfirm, setPassConfirm] = useState("");
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  const validate = () => {
-    const e = {};
-    if (!email) e.email = "メールアドレスを入力してください";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "正しいメールアドレスの形式で入力してください";
-    if (!pass) e.pass = "パスワードを入力してください";
-    else if (pass.length < 6) e.pass = "パスワードは6文字以上にしてください";
-    else if (!/[A-Z]/.test(pass)) e.pass = "大文字を1文字以上含めてください";
-    else if (!/[0-9]/.test(pass)) e.pass = "数字を1文字以上含めてください";
-    if (!passConfirm) e.passConfirm = "パスワード（確認）を入力してください";
-    else if (pass !== passConfirm) e.passConfirm = "パスワードが一致しません";
-    return e;
-  };
-
-  const doSignup = async () => {
-    const e = validate();
-    setErrors(e);
-    if (Object.keys(e).length > 0) return;
-    setLoading(true);
-    try {
-      await createUserWithEmailAndPassword(auth, email, pass);
-      setSuccess(true);
-    } catch(err) {
-      const m = {
-        "auth/email-already-in-use":"このメールアドレスはすでに登録されています",
-        "auth/invalid-email":"正しいメールアドレスの形式で入力してください",
-        "auth/weak-password":"パスワードが弱すぎます",
-        "auth/network-request-failed":"ネットワークエラーです"
-      };
-      setErrors({general: m[err.code] || "登録に失敗しました ("+err.code+")"});
-    } finally { setLoading(false); }
-  };
-
-  const inputStyle = (hasErr) => ({
-    width:"100%",background:"#1A1916",border:"1px solid "+(hasErr?"#FF5555":"#2E2D2B"),
-    borderRadius:12,padding:"14px 16px",color:"#F5F0E8",fontSize:15,outline:"none",
-    WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif",marginTop:6
-  });
-
-  const errStyle = {fontSize:12,color:RD,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.5};
-
-  return (
-    <div role="dialog" aria-modal="true" aria-label="新規ユーザー登録"
-      onClick={e=>{if(e.target===e.currentTarget)onClose();}}
-      style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"flex-end",justifyContent:"center",padding:"0"}}>
-      <div style={{background:BG,borderRadius:"20px 20px 0 0",padding:"28px 24px 48px",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"modalIn .3s ease",maxHeight:"90vh",overflowY:"auto"}}>
-
+function SignupModal({onClose}){
+  const[email,setEmail]=useState("");
+  const[pass,setPass]=useState("");
+  const[passConfirm,setPassConfirm]=useState("");
+  const[errors,setErrors]=useState({});
+  const[loading,setLoading]=useState(false);
+  const[success,setSuccess]=useState(false);
+  const validate=()=>{const e={};if(!email)e.email="メールアドレスを入力してください";else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))e.email="正しいメールアドレスの形式で入力してください";if(!pass)e.pass="パスワードを入力してください";else if(pass.length<6)e.pass="6文字以上にしてください";else if(!/[A-Z]/.test(pass))e.pass="大文字を1文字以上含めてください";else if(!/[0-9]/.test(pass))e.pass="数字を1文字以上含めてください";if(!passConfirm)e.passConfirm="確認用パスワードを入力してください";else if(pass!==passConfirm)e.passConfirm="パスワードが一致しません";return e;};
+  const doSignup=async()=>{const e=validate();setErrors(e);if(Object.keys(e).length>0)return;setLoading(true);try{await createUserWithEmailAndPassword(auth,email,pass);setSuccess(true);}catch(err){const m={"auth/email-already-in-use":"このメールアドレスはすでに登録されています","auth/invalid-email":"正しいメールアドレスの形式で入力してください","auth/weak-password":"パスワードが弱すぎます"};setErrors({general:m[err.code]||"登録に失敗しました"});}finally{setLoading(false);};};
+  const inp=(hasErr)=>({width:"100%",background:SF,border:"1px solid "+(hasErr?"#FF5555":"#2E2D2B"),borderRadius:12,padding:"14px 16px",color:TX,fontSize:15,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif",marginTop:6});
+  const errS={fontSize:12,color:RD,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif"};
+  return(
+    <div role="dialog" aria-modal="true" onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+      <div style={{background:BG,borderRadius:"20px 20px 0 0",padding:"28px 24px 48px",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .3s ease",maxHeight:"90vh",overflowY:"auto"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
-          <h2 style={{fontSize:18,fontWeight:800,letterSpacing:-.5}}>新規ユーザー登録</h2>
-          <button onClick={onClose} aria-label="閉じる"
-            style={{background:"none",border:"none",color:MU,fontSize:24,cursor:"pointer",lineHeight:1,padding:4}}>×</button>
+          <h2 style={{fontSize:18,fontWeight:800}}>新規ユーザー登録</h2>
+          <button onClick={onClose} style={{background:"none",border:"none",color:MU,fontSize:24,cursor:"pointer"}}>×</button>
         </div>
-
-        {success ? (
+        {success?(
           <div style={{textAlign:"center",padding:"20px 0"}}>
             <div style={{fontSize:48,marginBottom:16}}>🎉</div>
             <p style={{fontSize:16,fontWeight:700,marginBottom:8}}>登録完了！</p>
-            <p style={{fontSize:14,color:MU,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.7,marginBottom:24}}>アカウントが作成されました。<br/>このままアプリを使い始めてください！</p>
-            <button onClick={onClose}
-              style={{background:A,border:"none",borderRadius:12,padding:"13px 32px",color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
-              はじめる
-            </button>
+            <p style={{fontSize:14,color:MU,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.7,marginBottom:24}}>アカウントが作成されました。<br/>まずレシートをスキャンして食材を登録してみましょう！</p>
+            <button onClick={onClose} style={{background:A,border:"none",borderRadius:12,padding:"13px 32px",color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>はじめる</button>
           </div>
-        ) : (
+        ):(
           <>
             <div style={{marginBottom:16}}>
-              <label htmlFor="su-email" style={{fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",display:"block"}}>メールアドレス <span style={{color:RD}}>*</span></label>
-              <input id="su-email" type="email" value={email} onChange={e=>{setEmail(e.target.value);setErrors(p=>({...p,email:""}));}}
-                placeholder="example@mail.com" inputMode="email" autoComplete="email" style={inputStyle(!!errors.email)} aria-describedby={errors.email?"su-email-err":undefined} aria-invalid={!!errors.email}/>
-              {errors.email && <p id="su-email-err" role="alert" style={errStyle}>⚠ {errors.email}</p>}
+              <label style={{fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase"}}>メールアドレス <span style={{color:RD}}>*</span></label>
+              <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setErrors(p=>({...p,email:""}));}} placeholder="example@mail.com" style={inp(!!errors.email)}/>
+              {errors.email&&<p style={errS}>⚠ {errors.email}</p>}
             </div>
-
             <div style={{marginBottom:16}}>
-              <label htmlFor="su-pass" style={{fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",display:"block"}}>パスワード <span style={{color:RD}}>*</span></label>
-              <input id="su-pass" type="password" value={pass} onChange={e=>{setPass(e.target.value);setErrors(p=>({...p,pass:""}));}}
-                placeholder="例: Hello123" autoComplete="new-password" style={inputStyle(!!errors.pass)} aria-describedby="su-pass-hint su-pass-err" aria-invalid={!!errors.pass}/>
-              <p id="su-pass-hint" style={{fontSize:11,color:MU,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif"}}>6文字以上・大文字1文字以上・数字1文字以上</p>
-              {errors.pass && <p id="su-pass-err" role="alert" style={errStyle}>⚠ {errors.pass}</p>}
+              <label style={{fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase"}}>パスワード <span style={{color:RD}}>*</span></label>
+              <input type="password" value={pass} onChange={e=>{setPass(e.target.value);setErrors(p=>({...p,pass:""}));}} placeholder="例: Hello123" style={inp(!!errors.pass)}/>
+              <p style={{fontSize:11,color:MU,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif"}}>6文字以上・大文字1文字以上・数字1文字以上</p>
+              {errors.pass&&<p style={errS}>⚠ {errors.pass}</p>}
             </div>
-
             <div style={{marginBottom:24}}>
-              <label htmlFor="su-pass2" style={{fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",display:"block"}}>パスワード（確認） <span style={{color:RD}}>*</span></label>
-              <input id="su-pass2" type="password" value={passConfirm} onChange={e=>{setPassConfirm(e.target.value);setErrors(p=>({...p,passConfirm:""}));}}
-                onKeyDown={e=>e.key==="Enter"&&doSignup()}
-                placeholder="もう一度入力" autoComplete="new-password" style={inputStyle(!!errors.passConfirm)} aria-describedby={errors.passConfirm?"su-pass2-err":undefined} aria-invalid={!!errors.passConfirm}/>
-              {errors.passConfirm && <p id="su-pass2-err" role="alert" style={errStyle}>⚠ {errors.passConfirm}</p>}
+              <label style={{fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase"}}>パスワード（確認） <span style={{color:RD}}>*</span></label>
+              <input type="password" value={passConfirm} onChange={e=>{setPassConfirm(e.target.value);setErrors(p=>({...p,passConfirm:""}));}} onKeyDown={e=>e.key==="Enter"&&doSignup()} placeholder="もう一度入力" style={inp(!!errors.passConfirm)}/>
+              {errors.passConfirm&&<p style={errS}>⚠ {errors.passConfirm}</p>}
             </div>
-
-            {errors.general && <div role="alert" style={{background:"rgba(255,85,85,.1)",border:"1px solid rgba(255,85,85,.3)",borderRadius:10,padding:"12px 14px",fontSize:13,color:RD,fontFamily:"'Noto Sans JP',sans-serif",marginBottom:16,lineHeight:1.5}}>⚠ {errors.general}</div>}
-
-            <button onClick={doSignup} disabled={loading} aria-busy={loading}
-              style={{width:"100%",padding:16,background:loading?"#2A2927":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+            {errors.general&&<div role="alert" style={{background:"rgba(255,85,85,.1)",border:"1px solid rgba(255,85,85,.3)",borderRadius:10,padding:"12px 14px",fontSize:13,color:RD,fontFamily:"'Noto Sans JP',sans-serif",marginBottom:16}}>⚠ {errors.general}</div>}
+            <button onClick={doSignup} disabled={loading} style={{width:"100%",padding:16,background:loading?"#2A2927":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
               {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>登録中…</>:"アカウントを作成"}
             </button>
-
-            <button onClick={onClose}
-              style={{width:"100%",padding:13,background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:12}}>
-              キャンセル
-            </button>
+            <button onClick={onClose} style={{width:"100%",padding:13,background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:12}}>キャンセル</button>
           </>
         )}
       </div>
@@ -299,229 +97,411 @@ function SignupModal({ onClose }) {
   );
 }
 
-// ---- Main App ----
-function MainApp({ user }) {
-  const [tab, setTab] = useState("fridge");
-  const [fridge, setFridgeState] = useState(() => ld("fridge",[]));
-  const [settings, setSettingsState] = useState(() => ({...DS,...ld("settings",{})}));
-  const [syncing, setSyncing] = useState(true);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showReset, setShowReset] = useState(false);
-  const [scanning, setScanning] = useState(false);
-  const [scanStep, setScanStep] = useState(0);
-  const [scanLabel, setScanLabel] = useState("");
-  const [scanErr, setScanErr] = useState("");
-  const [scanData, setScanData] = useState(null);
-  const [cfmSel, setCfmSel] = useState(new Set());
-  const [manualOpen, setManualOpen] = useState(false);
-  const [editingExpiry, setEditingExpiry] = useState(null); // {id, expiry}
-  const [mName, setMName] = useState("");
-  const [mQty, setMQty] = useState(1);
-  const [mDate, setMDate] = useState(new Date().toISOString().split("T")[0]);
-  const [selIds, setSelIds] = useState(new Set());
-  const [selQty, setSelQty] = useState({});
-  const [recipeCount, setRecipeCount] = useState(1);
-  const [recipeHistory, setRecipeHistory] = useState(() => ld("recipeHistory",[]));
-  const [showHistory, setShowHistory] = useState(false);
-  const [pendingRecipe, setPendingRecipe] = useState(null); // {recipes, chosenIds, fridgeSnapshot}
-  const [generating, setGenerating] = useState(false);
-  const [recipe, setRecipe] = useState(null);
-  const [recipeTab, setRecipeTab] = useState("作り方");
-  const [recipeErr, setRecipeErr] = useState("");
-  const [shopChk, setShopChk] = useState(new Set());
-  const fileRef = useRef();
+function LoginScreen(){
+  const[email,setEmail]=useState("");
+  const[pass,setPass]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[err,setErr]=useState("");
+  const[showSignup,setShowSignup]=useState(false);
+  const doLogin=async()=>{if(!email||!pass){setErr("メールアドレスとパスワードを入力してください");return;}setLoading(true);setErr("");try{await signInWithEmailAndPassword(auth,email,pass);}catch(e){const m={"auth/invalid-credential":"メールアドレスまたはパスワードが間違っています","auth/invalid-email":"メールアドレスの形式が正しくありません","auth/too-many-requests":"しばらく待ってから試してください"};setErr(m[e.code]||"ログインに失敗しました");}finally{setLoading(false);};};
+  return(
+    <div style={{minHeight:"100vh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 24px"}}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;}::placeholder{color:#3A3835;}@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <div style={{width:"100%",maxWidth:360,animation:"fadeUp .5s ease",fontFamily:"'Syne',sans-serif",color:TX}}>
+        <div style={{textAlign:"center",marginBottom:48}}>
+          <div style={{fontSize:44,marginBottom:12}}>🍳</div>
+          <h1 style={{fontSize:34,fontWeight:800,letterSpacing:-1.5}}><span style={{color:A}}>ひとり</span>めし</h1>
+          <p style={{fontSize:11,color:MU,marginTop:8,letterSpacing:2,textTransform:"uppercase"}}>今夜の献立、5秒で決まる</p>
+        </div>
+        <div style={{marginBottom:14}}>
+          <label style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>メールアドレス</label>
+          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&document.getElementById("lp")?.focus()} placeholder="example@mail.com" autoComplete="email" style={{width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
+        </div>
+        <div style={{marginBottom:14}}>
+          <label style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>パスワード</label>
+          <input id="lp" type="password" value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="••••••••" autoComplete="current-password" style={{width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
+        </div>
+        <button onClick={doLogin} disabled={loading} style={{width:"100%",padding:16,background:loading?"#2A2927":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:24}}>
+          {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>ログイン中…</>:"ログイン"}
+        </button>
+        {err&&<div role="alert" style={{background:"rgba(255,85,85,.1)",border:"1px solid rgba(255,85,85,.3)",borderRadius:10,padding:"12px 14px",fontSize:13,color:RD,fontFamily:"'Noto Sans JP',sans-serif",marginTop:14,lineHeight:1.5}}>{err}</div>}
+        <div style={{textAlign:"center",marginTop:24}}>
+          <button onClick={()=>setShowSignup(true)} style={{background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",textDecoration:"underline"}}>アカウントをお持ちでない方はこちら</button>
+        </div>
+      </div>
+      {showSignup&&<SignupModal onClose={()=>setShowSignup(false)}/>}
+    </div>
+  );
+}
 
-  const setFridge = v => { setFridgeState(v); sv("fridge",v); cloudSet(user.uid,"fridge",v); };
-  const setSettings = v => { setSettingsState(v); sv("settings",v); cloudSet(user.uid,"settings",v); };
-  const addToHistory = (recipes) => {
-    const entry = { id: Date.now(), date: new Date().toLocaleDateString("ja-JP"), recipes };
-    const newHistory = [entry, ...recipeHistory].slice(0, 30);
-    setRecipeHistory(newHistory);
-    sv("recipeHistory", newHistory);
-    cloudSet(user.uid, "recipeHistory", newHistory);
+function MainApp({user}){
+  const[tab,setTab]=useState("recipe");
+  const[fridge,setFridgeState]=useState(()=>(ld("fridge",[])||[]).filter(i=>i&&i.name&&i.expiry));
+  const[settings,setSettingsState]=useState(()=>({...DS,...ld("settings",{})}));
+  const[recipeHistory,setRecipeHistory]=useState(()=>ld("recipeHistory",[]));
+  const[favorites,setFavoritesState]=useState(()=>ld("favorites",[]));
+  const[totalSaved,setTotalSavedState]=useState(()=>ld("totalSaved",0));
+  const[monthSaved,setMonthSavedState]=useState(()=>ld("monthSaved",{month:new Date().getMonth(),amount:0}));
+  const[menuOpen,setMenuOpen]=useState(false);
+  const[showSettings,setShowSettings]=useState(false);
+  const[showReset,setShowReset]=useState(false);
+  const[showHistory,setShowHistory]=useState(false);
+  const[showExpiryAlert,setShowExpiryAlert]=useState(false);
+  const[expiryAlert,setExpiryAlert]=useState([]);
+  const[scanning,setScanning]=useState(false);
+  const[scanStep,setScanStep]=useState(0);
+  const[scanLabel,setScanLabel]=useState("");
+  const[scanErr,setScanErr]=useState("");
+  const[scanData,setScanData]=useState(null);
+  const[cfmSel,setCfmSel]=useState(new Set());
+  const[manualOpen,setManualOpen]=useState(false);
+  const[mName,setMName]=useState("");
+  const[mQty,setMQty]=useState(1);
+  const[mDate,setMDate]=useState(new Date().toISOString().split("T")[0]);
+  const[selIds,setSelIds]=useState(new Set());
+  const[generating,setGenerating]=useState(false);
+  const[recipe,setRecipe]=useState(null);
+  const[pendingRecipe,setPendingRecipe]=useState(null);
+  const[recipeTab,setRecipeTab]=useState("作り方");
+  const[recipeErr,setRecipeErr]=useState("");
+  const[shopChk,setShopChk]=useState(new Set());
+  const[editingExpiry,setEditingExpiry]=useState(null);
+  const[swipeState,setSwipeState]=useState({});
+  const[expandedItem,setExpandedItem]=useState(null);
+  const fileRef=useRef();
+
+  const setFridge=v=>{const clean=(v||[]).filter(i=>i&&i.name&&i.expiry);setFridgeState(clean);sv("fridge",clean);};
+  const setSettings=v=>{setSettingsState(v);sv("settings",v);};
+  const setFavorites=v=>{setFavoritesState(v);sv("favorites",v);};
+  const addToHistory=recipes=>{const entry={id:Date.now(),date:new Date().toLocaleDateString("ja-JP"),recipes};const h=[entry,...recipeHistory].slice(0,30);setRecipeHistory(h);sv("recipeHistory",h);};
+  const toggleFavorite=recipe=>{const exists=favorites.find(f=>f.name===recipe.name);if(exists)setFavorites(favorites.filter(f=>f.name!==recipe.name));else setFavorites([{...recipe,savedAt:new Date().toLocaleDateString("ja-JP")},...favorites].slice(0,50));};
+  const addSavings=cost=>{
+    const saved=Math.round(CONVENIENCE_PRICE-cost);
+    if(saved<=0)return;
+    const newTotal=totalSaved+saved;
+    setTotalSavedState(newTotal);sv("totalSaved",newTotal);
+    const now=new Date();
+    const ms=monthSaved.month===now.getMonth()?{month:now.getMonth(),amount:monthSaved.amount+saved}:{month:now.getMonth(),amount:saved};
+    setMonthSavedState(ms);sv("monthSaved",ms);
   };
 
-  // Load from cloud on mount
-  useEffect(() => {
-    Promise.all([
-      cloudGet(user.uid, "fridge", []),
-      cloudGet(user.uid, "settings", DS),
-      cloudGet(user.uid, "recipeHistory", [])
-    ]).then(([f, s, h]) => {
-      if (f && f.length > 0) { setFridgeState(f); sv("fridge", f); }
-      setSettingsState(prev => ({...DS, ...s}));
-      if (h && h.length > 0) { setRecipeHistory(h); sv("recipeHistory", h); }
-      setSyncing(false);
-    }).catch(() => setSyncing(false));
-  }, [user.uid]);
+  useEffect(()=>{
+    const expiring=fridge.filter(i=>i&&i.expiry&&daysTo(i.expiry)<=3&&daysTo(i.expiry)>=0);
+    if(expiring.length>0){setExpiryAlert(expiring);setShowExpiryAlert(true);}
+    if("Notification"in window&&Notification.permission==="default"){
+      Notification.requestPermission().then(p=>{if(p==="granted"&&expiring.length>0)expiring.forEach(it=>new Notification("ひとりめし",{body:`${it.name}の期限が${daysTo(it.expiry)===0?"今日":"あと"+daysTo(it.expiry)+"日"}です`}));});
+    }else if("Notification"in window&&Notification.permission==="granted"&&expiring.length>0){
+      expiring.forEach(it=>new Notification("ひとりめし",{body:`${it.name}の期限が${daysTo(it.expiry)===0?"今日":"あと"+daysTo(it.expiry)+"日"}です`}));
+    }
+  },[]);
 
-  const sorted = [...fridge].sort((a,b) => new Date(a.expiry)-new Date(b.expiry));
+  const sorted=[...fridge].filter(i=>i&&i.expiry).sort((a,b)=>new Date(a.expiry)-new Date(b.expiry));
 
-  const addManual = () => {
-    if (!mName.trim()) return;
-    const item = {id:Date.now()+"_"+mName+"_"+Math.random(),name:mName.trim(),purchaseDate:mDate,expiry:predExp(mName.trim(),mDate),qty:Math.max(1,mQty)};
-    setFridge([...fridge, item]);
-    setMName(""); setMQty(1);
+  const addManual=()=>{
+    if(!mName.trim())return;
+    const item={id:Date.now()+"_"+mName+"_"+Math.random(),name:mName.trim(),purchaseDate:mDate,expiry:predExp(mName.trim(),mDate),qty:Math.max(1,mQty),storage:"冷蔵"};
+    setFridge([...fridge,item]);
+    setMName("");setMQty(1);
   };
 
-  const setP = (pct, lbl) => { setScanStep(pct); setScanLabel(lbl); };
+  const setP=(pct,lbl)=>{setScanStep(pct);setScanLabel(lbl);};
 
-  const scanReceipt = async (file) => {
-    setScanning(true); setScanErr(""); setScanData(null); setCfmSel(new Set());
+  const scanReceipt=async(file)=>{
+    setScanning(true);setScanErr("");setScanData(null);setCfmSel(new Set());
     const steps=[{p:15,l:"画像を読み込み中…"},{p:35,l:"レシートの向きを確認中…"},{p:55,l:"日付・店名を解析中…"},{p:75,l:"商品リストを読み取り中…"},{p:90,l:"金額を確認中…"}];
     let idx=0;
-    const tk = setInterval(()=>{ if(idx<steps.length){setP(steps[idx].p,steps[idx].l);idx++;} },1000);
-    try {
-      // Compress image before sending
-      const b64 = await new Promise((res, rej) => {
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX = 1200;
-          let w = img.width, h = img.height;
-          if (w > MAX || h > MAX) {
-            if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
-            else { w = Math.round(w * MAX / h); h = MAX; }
-          }
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          const data = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-          URL.revokeObjectURL(url);
-          res(data);
-        };
-        img.onerror = rej;
-        img.src = url;
+    const tk=setInterval(()=>{if(idx<steps.length){setP(steps[idx].p,steps[idx].l);idx++;}},1000);
+    try{
+      const b64=await new Promise((res,rej)=>{
+        const img=new Image();const url=URL.createObjectURL(file);
+        img.onload=()=>{const canvas=document.createElement("canvas");const MAX=1200;let w=img.width,h=img.height;if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}canvas.width=w;canvas.height=h;canvas.getContext("2d").drawImage(img,0,0,w,h);res(canvas.toDataURL("image/jpeg",0.7).split(",")[1]);URL.revokeObjectURL(url);};
+        img.onerror=rej;img.src=url;
       });
-      const today = new Date().toISOString().split("T")[0];
-      const h = {"Content-Type":"application/json"};
-      const res = await fetch("/api/chat",{method:"POST",headers:h,body:JSON.stringify({
+      const today=new Date().toISOString().split("T")[0];
+      const resp=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
         model:"claude-sonnet-4-6",max_tokens:2000,
-        system:"あなたは日本のスーパーやコンビニのレシートを読み取る専門家です。JSONのみ返してください。",
+        system:"日本のスーパーのレシートを読み取る専門家。JSONのみ返してください。",
         messages:[{role:"user",content:[
-          {type:"image",source:{type:"base64",media_type:file.type||"image/jpeg",data:b64}},
-          {type:"text",text:"このレシート画像を注意深く読み取ってください。今日は"+today+"です。\nJSONのみで返答（マークダウン不要）:\n{\"store\":\"店名\",\"date\":\"YYYY-MM-DD\",\"items\":[{\"name\":\"商品名\",\"price\":198,\"qty\":1,\"expiryDays\":7}]}\n\nルール:\n1. 日付はYYYY-MM-DD形式(令和6年=2024年)。不明なら"+today+"\n2. 全商品を列挙。消費税・合計・支払方法は除外\n3. expiryDaysは購入日からの賞味期限日数をAIが推定:\n   刺身・生魚:1-2日 / 生肉・ひき肉:2-3日 / 加工肉:7日\n   豆腐:4日 / 納豆:7日 / 卵:21日 / 牛乳:7日 / チーズ:14日\n   葉物野菜:4-5日 / 根菜:14-30日 / 果物:3-7日\n   惣菜・弁当:1-2日 / パン:3-5日 / 冷凍品:90日 / 缶詰:365日"}
+          {type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},
+          {type:"text",text:"このレシート画像を注意深く読み取ってください。今日は"+today+"です。\nJSONのみで返答（マークダウン不要）:\n{\"store\":\"店名\",\"date\":\"YYYY-MM-DD\",\"items\":[{\"name\":\"商品名\",\"price\":198,\"qty\":1,\"expiryDays\":7}]}\n\nルール:\n1. 日付はYYYY-MM-DD形式(令和6年=2024年)。不明なら"+today+"\n2. 全商品を列挙。消費税・合計・支払方法は除外\n3. expiryDaysは購入日からの賞味期限日数をAIが推定:\n   刺身・生魚:1-2日 / 生肉・ひき肉:2-3日 / 加工肉:7日\n   豆腐:4日 / 納豆:7日 / 卵:21日 / 牛乳:7日\n   葉物野菜:4-5日 / 根菜:14-30日 / 惣菜:1-2日 / 冷凍品:90日"}
         ]}]
       })});
-      if(!res.ok){const t=await res.text();setScanErr("APIエラー("+res.status+"): "+t.slice(0,80));return;}
-      const data = await res.json();
-      const parsed = xj((data.content||[]).map(b=>b.text||"").join(""));
-      if(!parsed||!parsed.items||!parsed.items.length){setScanErr("読み取り失敗。画像が鮮明か確認してください。");return;}
-      setScanData(parsed);
-      setCfmSel(new Set(parsed.items.map((_,i)=>i)));
-    } catch(e) { setScanErr("エラー: "+e.message); }
-    finally {
-      clearInterval(tk); setP(100,"完了！");
-      setTimeout(()=>{ setScanning(false); setScanStep(0); setScanLabel(""); },600);
-    }
+      if(!resp.ok){const t=await resp.text();setScanErr("APIエラー("+resp.status+"): "+t.slice(0,80));return;}
+      const data=await resp.json();
+      const parsed=xj((data.content||[]).map(b=>b.text||"").join(""));
+      if(!parsed||!parsed.items||!parsed.items.length){setScanErr("読み取り失敗。もう一度試してください。");return;}
+      setScanData(parsed);setCfmSel(new Set(parsed.items.map((_,i)=>i)));
+    }catch(e){setScanErr("エラー: "+e.message);}
+    finally{clearInterval(tk);setP(100,"完了！");setTimeout(()=>{setScanning(false);setScanStep(0);setScanLabel("");},600);}
   };
 
-  const confirmScan = () => {
-    if(!scanData) return;
-    const pd = scanData.date||new Date().toISOString().split("T")[0];
-    const newItems = scanData.items.filter((_,i)=>cfmSel.has(i)).map(it=>{
+  const confirmScan=()=>{
+    if(!scanData)return;
+    const pd=scanData.date||new Date().toISOString().split("T")[0];
+    const newItems=scanData.items.filter((_,i)=>cfmSel.has(i)).map(it=>{
       let expiry;
-      if (it.expiryDays) {
-        const d = new Date(pd);
-        d.setDate(d.getDate() + it.expiryDays);
-        expiry = d.toISOString().split("T")[0];
-      } else {
-        expiry = predExp(it.name, pd);
-      }
-      return {id:Date.now()+"_"+it.name+"_"+Math.random(),name:it.name,purchaseDate:pd,expiry,qty:it.qty||1};
+      if(it.expiryDays){const d=new Date(pd);d.setDate(d.getDate()+it.expiryDays);expiry=d.toISOString().split("T")[0];}
+      else expiry=predExp(it.name,pd);
+      return{id:Date.now()+"_"+it.name+"_"+Math.random(),name:it.name,purchaseDate:pd,expiry,qty:it.qty||1,storage:"冷蔵"};
     });
-    setFridge([...fridge,...newItems]);
-    setScanData(null);
+    setFridge([...fridge,...newItems]);setScanData(null);
   };
 
-  const genRecipe = async () => {
-    const chosen = fridge.filter(i=>selIds.has(i.id));
-    if(!chosen.length) return;
-    setGenerating(true); setRecipeErr(""); setRecipe(null);
-    try {
-      const {maxTime,dishCount,spiceLevel,cookStyle,riceSize} = settings;
-      const dn = dishCount==="少なめ"?"できるだけ少ない調理器具で":dishCount==="多くてもOK"?"洗い物は気にしない":"洗い物は普通程度で";
-      const ingredientList = chosen.map(i=>`${i.name}(在庫${i.qty}個)`).join(", ");
-      const styleGuide = cookStyle==="何でも" ? "デフォルトは和食（煮物・炒め物・丼・汁物など）を優先。バリエーションとして洋食・中華も可" : cookStyle+"を優先";
-      const p = `食材: ${ingredientList}。1人分のレシピを${recipeCount}つ提案。条件: ${maxTime}分以内、${dn}、味は${spiceLevel}、ご飯の量は${riceSize}、${styleGuide}。
-ご飯の量(${riceSize})に合わせて各食材の適切な使用個数をAIが判断すること。在庫数を超えないこと。
-${recipeCount}つのレシピはそれぞれ異なる料理ジャンル・調理法にすること。
-JSONのみ返答（配列で返すこと）: [{"name":"料理名","emoji":"🍳","time":"15分","difficulty":"簡単","description":"説明","calories":"400kcal","protein":"15g","carbs":"50g","fat":"10g","steps":["手順1","手順2","手順3"],"missing":[],"tip":"コツ","dishes":"使う調理器具","usedQty":{"食材名":使用個数}}]`;
-      const h = {"Content-Type":"application/json"};
-      const res = await fetch("/api/chat",{method:"POST",headers:h,body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:"日本語でJSONのみで返答。マークダウン不要。",messages:[{role:"user",content:p}]})});
-      if(!res.ok){const t=await res.text();setRecipeErr("APIエラー("+res.status+"): "+t.slice(0,80));return;}
-      const data = await res.json();
-      const rawText = (data.content||[]).map(b=>b.text||"").join("");
-      const parsed = xj(rawText);
+  const genRecipe=async()=>{
+    const chosen=fridge.filter(i=>selIds.has(i.id));
+    if(!chosen.length)return;
+    setGenerating(true);setRecipeErr("");setRecipe(null);setPendingRecipe(null);
+    const fridgeSnapshot=[...fridge];
+    try{
+      const{maxTime,dishCount,spiceLevel,cookStyle,riceSize}=settings;
+      const dn=dishCount==="少なめ"?"できるだけ少ない調理器具で":dishCount==="多くてもOK"?"洗い物は気にしない":"洗い物は普通程度で";
+      const styleGuide=cookStyle==="何でも"?"デフォルトは和食（煮物・炒め物・丼・汁物など）を優先。バリエーションとして洋食・中華も可":cookStyle+"を優先";
+      const ingredientList=chosen.map(i=>`${i.name}(在庫${i.qty}個)`).join(", ");
+      const p=`食材: ${ingredientList}。1人分のレシピを1つ提案。条件: ${maxTime}分以内、${dn}、味は${spiceLevel}、ご飯の量は${riceSize}、${styleGuide}。
+ご飯の量に合わせて各食材の適切な使用個数をAIが判断。在庫数を超えないこと。
+食欲をそそる魅力的な説明文にすること。
+JSONのみ返答: {"name":"料理名","emoji":"🍳","time":"15分","difficulty":"簡単","description":"食欲をそそる説明（30文字程度）","calories":"400kcal","protein":"15g","carbs":"50g","fat":"10g","estimatedCost":180,"steps":["手順1","手順2"],"missing":[],"tip":"コツ","dishes":"使う調理器具","usedQty":{"食材名":使用個数}}
+estimatedCostは食材費の概算（円）を必ず含めること。`;
+      const resp=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:"日本語でJSONのみで返答。マークダウン不要。",messages:[{role:"user",content:p}]})});
+      if(!resp.ok){const t=await resp.text();setRecipeErr("APIエラー("+resp.status+"): "+t.slice(0,80));return;}
+      const data=await resp.json();
+      const rawText=(data.content||[]).map(b=>b.text||"").join("");
+      const parsed=xj(rawText);
       if(!parsed){setRecipeErr("パースエラー。もう一度試してください。");return;}
-      const recipes = Array.isArray(parsed) ? parsed : [parsed];
-      setRecipe(recipes[0]); setRecipeTab("作り方"); setShopChk(new Set());
-      // Save pending state - don't modify fridge yet, wait for user confirmation
-      setPendingRecipe({ recipes, chosenIds: new Set(selIds), fridgeSnapshot: [...fridge] });
-      addToHistory(recipes);
-      setSelIds(new Set()); setSelQty({});
-    } catch(e) { setRecipeErr("エラー: "+e.message); }
-    finally { setGenerating(false); }
+      const r=Array.isArray(parsed)?parsed[0]:parsed;
+      setRecipe(r);setRecipeTab("作り方");setShopChk(new Set());
+      setPendingRecipe({recipe:r,chosenIds:new Set(selIds),fridgeSnapshot});
+      addToHistory([r]);setSelIds(new Set());
+    }catch(e){setRecipeErr("エラー: "+e.message);}
+    finally{setGenerating(false);}
   };
 
-  const btnStyle = (on) => ({flex:1,padding:"9px",background:on?A:"transparent",border:"none",borderRadius:10,color:on?"#fff":MU,fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",transition:"all .2s"});
+  const confirmCook=()=>{
+    if(!pendingRecipe)return;
+    const aiUsedQty=pendingRecipe.recipe.usedQty||{};
+    setFridge(fridge.map(item=>{
+      if(!pendingRecipe.chosenIds.has(item.id))return item;
+      const used=aiUsedQty[item.name]||1;
+      const remaining=item.qty-used;
+      if(remaining<=0)return null;
+      return{...item,qty:remaining};
+    }).filter(Boolean));
+    addSavings(pendingRecipe.recipe.estimatedCost||200);
+    setPendingRecipe(null);
+    setRecipe(null);
+    setTab("fridge");
+  };
 
-  return (
+  const cancelCook=()=>{
+    setFridge(pendingRecipe.fridgeSnapshot);
+    setPendingRecipe(null);
+    setRecipe(null);
+    genRecipe();
+  };
+
+  const btnStyle=(on)=>({flex:1,padding:"9px",background:on?A:"transparent",border:"none",borderRadius:10,color:on?"#fff":MU,fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",transition:"all .2s"});
+
+  return(
     <div style={{minHeight:"100vh",background:BG,color:TX,fontFamily:"'Syne',sans-serif",paddingBottom:80,maxWidth:480,margin:"0 auto"}}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}::placeholder{color:#3A3835;}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:#2A2927;outline:none}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#FF6B35;cursor:pointer}`}</style>
 
       {/* Header */}
       <div style={{padding:"18px 20px 14px",borderBottom:"1px solid #2A2927",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative"}}>
-        <div style={{display:"flex",alignItems:"baseline",gap:6}}>
-          <span style={{fontSize:22,fontWeight:800,letterSpacing:-1,color:A}}>ひとり</span>
-          <span style={{fontSize:22,fontWeight:800,letterSpacing:-1}}>めし</span>
-          {syncing && <span style={{fontSize:10,color:MU,marginLeft:4}}>同期中…</span>}
+        <div>
+          <div style={{display:"flex",alignItems:"baseline",gap:6}}>
+            <span style={{fontSize:22,fontWeight:800,letterSpacing:-1,color:A}}>ひとり</span>
+            <span style={{fontSize:22,fontWeight:800,letterSpacing:-1}}>めし</span>
+          </div>
+          {/* 月間節約額 */}
+          {monthSaved.amount>0&&(
+            <div style={{fontSize:11,color:GN,marginTop:2,fontFamily:"'Noto Sans JP',sans-serif"}}>
+              💰 今月の節約額 <span style={{fontWeight:700,fontSize:13}}>¥{monthSaved.amount.toLocaleString()}</span>
+            </div>
+          )}
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
-
+          <button onClick={()=>setShowHistory(true)} style={{background:"transparent",border:"1px solid #3A3835",borderRadius:8,padding:"5px 10px",fontSize:11,color:MU,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>📋</button>
           <button onClick={()=>setMenuOpen(s=>!s)} style={{background:"none",border:"none",padding:4,cursor:"pointer",display:"flex",flexDirection:"column",gap:4}}>
             {[0,1,2].map(i=><span key={i} style={{display:"block",width:20,height:2,background:TX,borderRadius:2,transition:"all .2s",transform:menuOpen&&i===0?"rotate(45deg) translate(4px,4px)":menuOpen&&i===2?"rotate(-45deg) translate(4px,-4px)":"none",opacity:menuOpen&&i===1?0:1}}/>)}
           </button>
         </div>
-        {menuOpen && (
+        {menuOpen&&(
           <div style={{position:"absolute",top:"100%",right:16,zIndex:100,background:CD,border:"1px solid #3A3835",borderRadius:12,padding:8,minWidth:160,animation:"slideDown .2s ease",boxShadow:"0 8px 32px rgba(0,0,0,.5)"}}>
-            {[
-              {label:"⚙️ 設定",fn:()=>{setShowSettings(true);setMenuOpen(false);}},
-              {label:"🚪 ログアウト",fn:()=>{signOut(auth);setMenuOpen(false);}},
-              {label:"🗑 冷蔵庫をリセット",fn:()=>{setShowReset(true);setMenuOpen(false);},danger:true}
-            ].map((item,i)=>(
-              <button key={i} onClick={item.fn} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"10px 12px",background:"none",border:"none",color:item.danger?RD:TX,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",borderRadius:8,cursor:"pointer",textAlign:"left"}}>
-                {item.label}
-              </button>
+            {[{label:"⚙️ 設定",fn:()=>{setShowSettings(true);setMenuOpen(false);}},{label:"🚪 ログアウト",fn:()=>{signOut(auth);setMenuOpen(false);}},{label:"🗑 冷蔵庫をリセット",fn:()=>{setShowReset(true);setMenuOpen(false);},danger:true}].map((item,i)=>(
+              <button key={i} onClick={item.fn} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"10px 12px",background:"none",border:"none",color:item.danger?RD:TX,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",borderRadius:8,cursor:"pointer",textAlign:"left"}}>{item.label}</button>
             ))}
           </div>
         )}
       </div>
-      {menuOpen && <div onClick={()=>setMenuOpen(false)} style={{position:"fixed",inset:0,zIndex:50}}/>}
-
-
+      {menuOpen&&<div onClick={()=>setMenuOpen(false)} style={{position:"fixed",inset:0,zIndex:50}}/>}
 
       {/* Tabs */}
       <div style={{display:"flex",padding:"10px 20px 0",gap:4}}>
-        <button style={btnStyle(tab==="fridge")} onClick={()=>setTab("fridge")}>冷蔵庫</button>
-        <button style={btnStyle(tab==="recipe")} onClick={()=>setTab("recipe")}>レシピ</button>
+        <button style={btnStyle(tab==="recipe")} onClick={()=>setTab("recipe")}>🍳 レシピ</button>
+        <button style={btnStyle(tab==="fridge")} onClick={()=>setTab("fridge")}>🧊 冷蔵庫 {fridge.length>0&&<span style={{fontSize:11,opacity:.7}}>({fridge.length})</span>}</button>
       </div>
 
-      {/* FRIDGE */}
-      {tab==="fridge" && (
+      {/* RECIPE TAB */}
+      {tab==="recipe"&&(
         <div style={{padding:"18px 20px 0",animation:"fadeUp .3s ease"}}>
-          {/* Scan */}
+
+          {/* 設定バッジ */}
+          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}} onClick={()=>setShowSettings(true)}>
+            {[`⏱ ${settings.maxTime}分`,`🍚 ${settings.riceSize}`,`🍽 ${settings.dishCount}`,`🧂 ${settings.spiceLevel}`,...(settings.cookStyle!=="何でも"?[`🔥 ${settings.cookStyle}`]:[])].map((b,i)=>(
+              <span key={i} style={{fontSize:11,color:BL,background:BL+"18",border:"1px solid "+BL+"33",padding:"4px 10px",borderRadius:20,cursor:"pointer"}}>{b}</span>
+            ))}
+          </div>
+
+          {/* 食材選択 */}
+          {fridge.length===0?(
+            <div style={{textAlign:"center",padding:"40px 20px",background:SF,borderRadius:16,border:"1px dashed #3A3835"}}>
+              <div style={{fontSize:40,marginBottom:12}}>🛒</div>
+              <p style={{fontSize:15,fontWeight:700,marginBottom:8}}>冷蔵庫が空です</p>
+              <p style={{color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.7,marginBottom:16}}>レシートをスキャンして食材を登録すると<br/>AIがレシピを提案します</p>
+              <button onClick={()=>setTab("fridge")} style={{background:A,border:"none",borderRadius:10,padding:"11px 24px",color:"#fff",fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>食材を登録する →</button>
+            </div>
+          ):(
+            <>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                <p style={{fontSize:12,color:MU}}>使う食材を選択</p>
+                <button onClick={()=>setSelIds(new Set(sorted.slice(0,4).map(i=>i.id)))} style={{background:"transparent",border:"1px solid #3A3835",borderRadius:8,padding:"5px 12px",color:YW,fontSize:12,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>⚡ 期限順で自動選択</button>
+              </div>
+              {sorted.map(it=>{
+                const s=selIds.has(it.id),d=daysTo(it.expiry),c=ec(d);
+                return(
+                  <div key={it.id} onClick={()=>{const ns=new Set(selIds);ns.has(it.id)?ns.delete(it.id):ns.add(it.id);setSelIds(ns);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:s?CD:SF,borderRadius:12,marginBottom:8,border:"1px solid "+(s?A:"#2A2927"),cursor:"pointer",transition:"all .15s"}}>
+                    <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(s?A:"#3A3835"),background:s?A:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:12,color:"#fff",transition:"all .15s"}}>{s?"✓":""}</div>
+                    <p style={{flex:1,fontSize:14,fontFamily:"'Noto Sans JP',sans-serif"}}>{it.name}{it.qty>1&&<span style={{fontSize:12,color:MU,marginLeft:6}}>×{it.qty}</span>}</p>
+                    <span style={{fontSize:11,color:c,background:c+"22",padding:"2px 8px",borderRadius:20}}>{el(d)}</span>
+                  </div>
+                );
+              })}
+              <button onClick={genRecipe} disabled={selIds.size===0||generating}
+                style={{width:"100%",padding:15,marginTop:8,background:selIds.size===0||generating?"#2A2927":A,color:selIds.size===0||generating?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:selIds.size===0||generating?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"all .2s"}}>
+                {generating?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>レシピを考え中…</>:`🍳 ${selIds.size}品でレシピを作る`}
+              </button>
+              {recipeErr&&(
+                <div style={{marginTop:8}}>
+                  <p style={{color:RD,fontSize:12,lineHeight:1.5,marginBottom:8}}>{recipeErr}</p>
+                  <button onClick={genRecipe} style={{background:A,border:"none",borderRadius:10,padding:"10px 20px",color:"#fff",fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>🔄 もう一度試す</button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* レシピ結果 */}
+          {recipe&&(
+            <div style={{marginTop:20,animation:"fadeUp .4s ease"}}>
+              <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #2E2D2B",marginBottom:8}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                  <div style={{fontSize:32,marginBottom:6}}>{recipe.emoji}</div>
+                  <button onClick={()=>toggleFavorite(recipe)} style={{background:"none",border:"none",fontSize:24,cursor:"pointer",padding:4}}>{favorites.find(f=>f.name===recipe.name)?"❤️":"🤍"}</button>
+                </div>
+                <h2 style={{fontSize:20,fontWeight:800,letterSpacing:-.5}}>{recipe.name}</h2>
+                <p style={{fontSize:13,color:MU,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.6}}>{recipe.description}</p>
+
+                {/* 節約額表示 */}
+                {recipe.estimatedCost&&(
+                  <div style={{marginTop:14,background:CD,borderRadius:12,padding:"12px 14px",border:"1px solid #3A3835"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                      <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif"}}>この料理の食材費</span>
+                      <span style={{fontSize:18,fontWeight:800,color:TX}}>約 ¥{recipe.estimatedCost}</span>
+                    </div>
+                    {[{label:"vs コンビニ弁当",price:CONVENIENCE_PRICE},{label:"vs 外食",price:RESTAURANT_PRICE},{label:"vs デリバリー",price:DELIVERY_PRICE}].map((c,i)=>{
+                      const saved=c.price-recipe.estimatedCost;
+                      return(
+                        <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderTop:"1px solid #2A2927"}}>
+                          <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif"}}>{c.label} <span style={{color:"#444"}}>¥{c.price}</span></span>
+                          <span style={{fontSize:13,fontWeight:700,color:saved>0?GN:MU}}>{saved>0?`¥${saved} お得`:"±0"}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div style={{display:"flex",gap:8,marginTop:12}}>
+                  {[{i:"⏱",v:recipe.time},{i:"📊",v:recipe.difficulty},{i:"🔥",v:recipe.calories}].map((x,i)=>(
+                    <div key={i} style={{flex:1,background:CD,borderRadius:10,padding:"9px 6px",textAlign:"center"}}>
+                      <div style={{fontSize:14}}>{x.i}</div>
+                      <div style={{fontSize:11,color:TX,fontWeight:600,marginTop:2}}>{x.v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* タブ */}
+              <div style={{display:"flex",gap:2,marginBottom:10,background:SF,borderRadius:12,padding:4}}>
+                {["作り方","栄養","買い物"].map(t=>(
+                  <button key={t} onClick={()=>setRecipeTab(t)} style={{flex:1,padding:"8px 4px",background:recipeTab===t?CD:"transparent",border:"none",borderRadius:9,color:recipeTab===t?TX:MU,fontSize:13,fontWeight:recipeTab===t?700:400,fontFamily:"'Syne',sans-serif",cursor:"pointer",transition:"all .2s"}}>
+                    {t}{t==="買い物"&&recipe.missing?.length?` (${recipe.missing.length})`:""}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #2E2D2B",marginBottom:8}}>
+                {recipeTab==="作り方"&&(
+                  <div>
+                    {(recipe.steps||[]).map((s,i)=>(
+                      <div key={i} style={{display:"flex",gap:12,marginBottom:14}}>
+                        <div style={{width:24,height:24,borderRadius:"50%",background:i===0?A:CD,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,flexShrink:0,color:i===0?"#fff":MU}}>{i+1}</div>
+                        <p style={{fontSize:14,lineHeight:1.7,color:TX,fontFamily:"'Noto Sans JP',sans-serif",paddingTop:2}}>{s}</p>
+                      </div>
+                    ))}
+                    {recipe.tip&&<div style={{marginTop:12,background:CD,borderRadius:10,padding:"11px 13px",borderLeft:"3px solid "+GN,display:"flex",gap:10}}><span>💡</span><p style={{fontSize:13,color:TX,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.6}}>{recipe.tip}</p></div>}
+                    {recipe.dishes&&<p style={{fontSize:11,color:MU,marginTop:10,fontFamily:"'Noto Sans JP',sans-serif"}}>🍽 {recipe.dishes}</p>}
+                  </div>
+                )}
+                {recipeTab==="栄養"&&(
+                  <div>
+                    {[{l:"カロリー",v:recipe.calories,m:800,c:A},{l:"タンパク質",v:recipe.protein,m:60,c:GN},{l:"炭水化物",v:recipe.carbs,m:100,c:BL},{l:"脂質",v:recipe.fat,m:50,c:YW}].map((n,i)=>(
+                      <div key={i} style={{marginBottom:12}}>
+                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:12,color:MU}}>{n.l}</span><span style={{fontSize:12,color:TX}}>{n.v}</span></div>
+                        <div style={{height:4,background:"#2A2927",borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:Math.min((parseInt(n.v)/n.m)*100,100)+"%",background:n.c,borderRadius:2,transition:"width .8s"}}/></div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {recipeTab==="買い物"&&(
+                  <div>
+                    {!recipe.missing?.length?(
+                      <div style={{textAlign:"center",padding:"16px 0"}}><p style={{fontSize:22,marginBottom:6}}>✅</p><p style={{color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif"}}>追加食材なし！</p></div>
+                    ):recipe.missing.map((name,i)=>(
+                      <div key={i} onClick={()=>{const s=new Set(shopChk);s.has(i)?s.delete(i):s.add(i);setShopChk(s);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 0",borderBottom:"1px solid #2A2927",cursor:"pointer"}}>
+                        <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(shopChk.has(i)?GN:"#3A3835"),background:shopChk.has(i)?GN:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:11,color:"#fff",transition:"all .2s"}}>{shopChk.has(i)?"✓":""}</div>
+                        <span style={{fontSize:14,fontFamily:"'Noto Sans JP',sans-serif",textDecoration:shopChk.has(i)?"line-through":"none",color:shopChk.has(i)?MU:TX}}>{name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 作った！/ 次のレシピ */}
+              {pendingRecipe&&(
+                <div style={{display:"flex",gap:8,paddingBottom:20}}>
+                  <button onClick={confirmCook} style={{flex:2,padding:"14px",background:GN,border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
+                    ✅ 作った！
+                  </button>
+                  <button onClick={cancelCook} style={{flex:1,padding:"14px",background:CD,border:"1px solid #3A3835",borderRadius:12,color:MU,fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
+                    次へ 🔄
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* FRIDGE TAB */}
+      {tab==="fridge"&&(
+        <div style={{padding:"18px 20px 0",animation:"fadeUp .3s ease"}}>
+          {/* スキャン */}
           <div style={{marginBottom:14}}>
             <button onClick={()=>fileRef.current.click()} disabled={scanning}
               style={{width:"100%",padding:14,background:scanning?"#1A1916":SF,border:"1px dashed "+(scanning?A:"#3A3835"),borderRadius:12,color:TX,fontSize:14,fontWeight:600,fontFamily:"'Syne',sans-serif",cursor:scanning?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
-              {scanning
-                ? <><span style={{width:16,height:16,border:"2px solid #444",borderTopColor:A,borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>AIが解析中</>
-                : <><span style={{fontSize:20}}>📷</span>レシートをスキャンして食材を自動登録</>}
+              {scanning?<><span style={{width:16,height:16,border:"2px solid #444",borderTopColor:A,borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>AIが解析中</>:<><span style={{fontSize:20}}>📷</span>レシートをスキャンして食材を自動登録</>}
             </button>
             <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={e=>{if(e.target.files[0])scanReceipt(e.target.files[0]);e.target.value="";}}/>
-
-            {scanning && (
+            {scanning&&(
               <div style={{marginTop:10,background:SF,borderRadius:10,padding:"12px 14px",border:"1px solid #2A2927"}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
                   <span style={{fontSize:12,color:TX,fontFamily:"'Noto Sans JP',sans-serif"}}>{scanLabel}</span>
@@ -530,24 +510,18 @@ JSONのみ返答（配列で返すこと）: [{"name":"料理名","emoji":"🍳"
                 <div style={{height:5,background:CD,borderRadius:3,overflow:"hidden"}}>
                   <div style={{height:"100%",width:scanStep+"%",background:`linear-gradient(90deg,${A},${YW})`,borderRadius:3,transition:"width .7s ease"}}/>
                 </div>
-                <div style={{display:"flex",justifyContent:"space-around",marginTop:10}}>
-                  {["画像読込","店名・日付","商品一覧","金額確認","完了"].map((s,i)=>{
-                    const done = scanStep>=[15,55,75,90,100][i];
-                    return (
-                      <div key={i} style={{textAlign:"center"}}>
-                        <div style={{width:18,height:18,borderRadius:"50%",background:done?A:CD,border:"2px solid "+(done?A:"#3A3835"),display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 4px",fontSize:10,color:"#fff",transition:"all .4s"}}>{done?"✓":""}</div>
-                        <span style={{fontSize:9,color:done?A:MU}}>{s}</span>
-                      </div>
-                    );
-                  })}
-                </div>
               </div>
             )}
-            {scanErr && <p style={{color:RD,fontSize:12,marginTop:6,lineHeight:1.5}}>{scanErr}</p>}
+            {scanErr&&(
+              <div style={{marginTop:6}}>
+                <p style={{color:RD,fontSize:12,lineHeight:1.5,marginBottom:6}}>{scanErr}</p>
+                <button onClick={()=>fileRef.current.click()} style={{background:A,border:"none",borderRadius:8,padding:"8px 16px",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>🔄 もう一度スキャン</button>
+              </div>
+            )}
           </div>
 
-          {/* Scan confirm */}
-          {scanData && (
+          {/* スキャン確認 */}
+          {scanData&&(
             <div style={{background:SF,borderRadius:14,padding:16,border:"1px solid "+A,marginBottom:14,animation:"fadeUp .3s ease"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
                 <div>
@@ -561,7 +535,7 @@ JSONのみ返答（配列で返すこと）: [{"name":"料理名","emoji":"🍳"
                 <div key={i} onClick={()=>{const s=new Set(cfmSel);s.has(i)?s.delete(i):s.add(i);setCfmSel(s);}} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid #2A2927",cursor:"pointer"}}>
                   <div style={{width:18,height:18,borderRadius:5,border:"2px solid "+(cfmSel.has(i)?A:"#3A3835"),background:cfmSel.has(i)?A:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:10,color:"#fff",transition:"all .15s"}}>{cfmSel.has(i)?"✓":""}</div>
                   <span style={{flex:1,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",color:cfmSel.has(i)?TX:MU}}>{it.name}</span>
-                  {it.price>0 && <span style={{fontSize:11,color:MU}}>¥{it.price}</span>}
+                  {it.price>0&&<span style={{fontSize:11,color:MU}}>¥{it.price}</span>}
                 </div>
               ))}
               <div style={{display:"flex",gap:8,marginTop:14}}>
@@ -571,20 +545,20 @@ JSONのみ返答（配列で返すこと）: [{"name":"料理名","emoji":"🍳"
             </div>
           )}
 
-          {/* Manual add */}
+          {/* 手動追加 */}
           <button onClick={()=>setManualOpen(s=>!s)} style={{width:"100%",padding:10,background:"transparent",border:"1px solid #2E2D2B",borderRadius:10,color:MU,fontSize:13,fontFamily:"'Syne',sans-serif",cursor:"pointer",marginBottom:12}}>
             {manualOpen?"▲ 閉じる":"+ 手動で食材を追加"}
           </button>
-          {manualOpen && (
+          {manualOpen&&(
             <div style={{background:SF,borderRadius:12,padding:14,marginBottom:14,border:"1px solid #2E2D2B"}}>
               <input value={mName} onChange={e=>setMName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addManual()} placeholder="食材名（例: 卵）"
                 style={{width:"100%",background:CD,border:"1px solid #3A3835",borderRadius:8,padding:"10px 12px",color:TX,fontSize:14,outline:"none",fontFamily:"'Noto Sans JP',sans-serif",marginBottom:8}}/>
               <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
                 <label style={{fontSize:12,color:MU,whiteSpace:"nowrap"}}>個数</label>
                 <div style={{display:"flex",alignItems:"center",gap:0,background:CD,border:"1px solid #3A3835",borderRadius:8,overflow:"hidden"}}>
-                  <button onClick={()=>setMQty(q=>Math.max(1,q-1))} style={{width:36,height:36,background:"none",border:"none",color:TX,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
+                  <button onClick={()=>setMQty(q=>Math.max(1,q-1))} style={{width:36,height:36,background:"none",border:"none",color:TX,fontSize:18,cursor:"pointer"}}>−</button>
                   <span style={{minWidth:32,textAlign:"center",fontSize:14,color:TX,fontWeight:700}}>{mQty}</span>
-                  <button onClick={()=>setMQty(q=>Math.min(99,q+1))} style={{width:36,height:36,background:"none",border:"none",color:TX,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>＋</button>
+                  <button onClick={()=>setMQty(q=>Math.min(99,q+1))} style={{width:36,height:36,background:"none",border:"none",color:TX,fontSize:18,cursor:"pointer"}}>＋</button>
                 </div>
               </div>
               <div style={{display:"flex",gap:8,alignItems:"center"}}>
@@ -596,39 +570,84 @@ JSONのみ返答（配列で返すこと）: [{"name":"料理名","emoji":"🍳"
             </div>
           )}
 
-          {/* Fridge list */}
-          {sorted.length===0 ? (
+          {/* 冷蔵庫リスト */}
+          {sorted.length===0?(
             <div style={{textAlign:"center",padding:"40px 0",opacity:.4}}>
               <div style={{fontSize:40,marginBottom:12}}>🛒</div>
               <p style={{color:MU,fontSize:14,fontFamily:"'Noto Sans JP',sans-serif"}}>レシートをスキャンして食材を登録しよう</p>
             </div>
-          ) : (
+          ):(
             <>
               <p style={{fontSize:11,color:MU,marginBottom:10,letterSpacing:1}}>{sorted.length}品 ・ 賞味期限順</p>
               {sorted.map(it=>{
                 const d=daysTo(it.expiry),c=ec(d);
-                return (
-                  <div key={it.id} style={{background:SF,borderRadius:12,marginBottom:8,border:"1px solid #2A2927",overflow:"hidden"}}>
-                    <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px"}}>
-                      <div style={{flex:1}}>
-                        <p style={{fontSize:15,fontFamily:"'Noto Sans JP',sans-serif",fontWeight:500}}>{it.name}{it.qty>1&&<span style={{fontSize:12,color:MU,marginLeft:6}}>×{it.qty}</span>}</p>
-                        <p style={{fontSize:11,color:MU,marginTop:2}}>購入: {it.purchaseDate}</p>
-                      </div>
-                      <span onClick={()=>setEditingExpiry(editingExpiry?.id===it.id?null:{id:it.id,expiry:it.expiry})}
-                        style={{fontSize:12,fontWeight:700,color:c,background:c+"22",padding:"3px 10px",borderRadius:20,cursor:"pointer",userSelect:"none"}}>
-                        {el(d)} ✎
-                      </span>
-                      <button onClick={()=>setFridge(fridge.filter(i=>i.id!==it.id))} style={{background:"none",border:"none",color:MU,fontSize:18,padding:"0 2px",lineHeight:1,cursor:"pointer"}}>×</button>
+                const isExpanded=expandedItem===it.id;
+                return(
+                  <div key={it.id} style={{position:"relative",marginBottom:8,borderRadius:12,overflow:"hidden"}}>
+                    <div style={{position:"absolute",right:0,top:0,bottom:0,width:80,background:RD,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"0 12px 12px 0"}}>
+                      <span style={{color:"#fff",fontSize:22}}>🗑</span>
                     </div>
-                    {editingExpiry?.id===it.id && (
-                      <div style={{padding:"0 14px 12px",borderTop:"1px solid #2A2927",display:"flex",alignItems:"center",gap:8}}>
-                        <span style={{fontSize:12,color:MU,whiteSpace:"nowrap",fontFamily:"'Noto Sans JP',sans-serif"}}>賞味期限:</span>
-                        <input type="date" value={editingExpiry.expiry} onChange={e=>setEditingExpiry(prev=>({...prev,expiry:e.target.value}))}
-                          style={{flex:1,background:CD,border:"1px solid #3A3835",borderRadius:8,padding:"7px 10px",color:TX,fontSize:13,outline:"none"}}/>
-                        <button onClick={()=>{setFridge(f=>f.map(i=>i.id===it.id?{...i,expiry:editingExpiry.expiry}:i));setEditingExpiry(null);}}
-                          style={{background:A,border:"none",borderRadius:8,padding:"7px 14px",color:"#fff",fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",whiteSpace:"nowrap"}}>保存</button>
+                    <div style={{background:SF,borderRadius:12,border:"1px solid #2A2927",overflow:"hidden",transform:`translateX(${Math.min(0,swipeState[it.id]||0)}px)`,transition:swipeState[it.id]===undefined?"transform .2s":"none",touchAction:"pan-y"}}
+                      onTouchStart={e=>{const x=e.touches[0].clientX;setSwipeState(s=>({...s,[it.id+"_start"]:x}));}}
+                      onTouchMove={e=>{const start=swipeState[it.id+"_start"]||0;const dx=e.touches[0].clientX-start;if(dx<0)setSwipeState(s=>({...s,[it.id]:dx}));}}
+                      onTouchEnd={()=>{const offset=swipeState[it.id]||0;if(offset<-60){setFridge(fridge.filter(i=>i.id!==it.id));}setSwipeState(s=>({...s,[it.id]:0,[it.id+"_start"]:0}));}}>
+                      {/* メイン行 */}
+                      <div onClick={()=>setExpandedItem(isExpanded?null:it.id)} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",cursor:"pointer"}}>
+                        <div style={{flex:1}}>
+                          <p style={{fontSize:15,fontFamily:"'Noto Sans JP',sans-serif",fontWeight:500}}>{it.name}{it.qty>1&&<span style={{fontSize:12,color:MU,marginLeft:6}}>×{it.qty}</span>}</p>
+                          <p style={{fontSize:11,color:MU,marginTop:2}}>購入: {it.purchaseDate}</p>
+                        </div>
+                        <span style={{fontSize:12,fontWeight:700,color:c,background:c+"22",padding:"3px 10px",borderRadius:20}}>{el(d)}</span>
+                        <span style={{fontSize:12,color:MU,transition:"transform .2s",display:"inline-block",transform:isExpanded?"rotate(180deg)":"none"}}>▼</span>
                       </div>
-                    )}
+                      {/* 展開エリア：個数・保存場所・期限編集 */}
+                      {isExpanded&&(
+                        <div style={{borderTop:"1px solid #2A2927",padding:"10px 14px 12px"}}>
+                          {/* 個数 */}
+                          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                            <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif",minWidth:48}}>個数</span>
+                            <div style={{display:"flex",alignItems:"center",background:CD,border:"1px solid #3A3835",borderRadius:8,overflow:"hidden"}}>
+                              <button onClick={e=>{e.stopPropagation();setFridge(f=>f.map(i=>i.id===it.id?{...i,qty:Math.max(1,i.qty-1)}:i));}} style={{width:32,height:30,background:"none",border:"none",color:TX,fontSize:16,cursor:"pointer"}}>−</button>
+                              <span style={{minWidth:28,textAlign:"center",fontSize:13,color:TX,fontWeight:700}}>{it.qty||1}</span>
+                              <button onClick={e=>{e.stopPropagation();setFridge(f=>f.map(i=>i.id===it.id?{...i,qty:(i.qty||1)+1}:i));}} style={{width:32,height:30,background:"none",border:"none",color:TX,fontSize:16,cursor:"pointer"}}>＋</button>
+                            </div>
+                          </div>
+                          {/* 保存場所 */}
+                          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                            <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif",minWidth:48}}>保存</span>
+                            <div style={{display:"flex",gap:4,flex:1}}>
+                              {["冷蔵","冷凍","常温"].map(s=>(
+                                <button key={s} onClick={e=>{e.stopPropagation();
+                                  setFridge(f=>f.map(i=>{
+                                    if(i.id!==it.id)return i;
+                                    let expiry=i.expiry;
+                                    if(s==="冷凍"&&(i.storage||"冷蔵")!=="冷凍"){const rem=daysTo(i.expiry);const d=new Date();d.setDate(d.getDate()+rem*5);expiry=d.toISOString().split("T")[0];}
+                                    else if(s!=="冷凍"&&(i.storage||"冷蔵")==="冷凍"){const rem=daysTo(i.expiry);const d=new Date();d.setDate(d.getDate()+Math.round(rem/5));expiry=d.toISOString().split("T")[0];}
+                                    return{...i,storage:s,expiry};
+                                  }));
+                                }} style={{flex:1,padding:"5px 4px",background:(it.storage||"冷蔵")===s?A:CD,border:"1px solid "+((it.storage||"冷蔵")===s?A:"#3A3835"),borderRadius:7,color:(it.storage||"冷蔵")===s?"#fff":MU,fontSize:11,cursor:"pointer",fontFamily:"'Syne',sans-serif"}}>
+                                  {s==="冷蔵"?"🧊 冷蔵":s==="冷凍"?"❄️ 冷凍":"🌡 常温"}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          {/* 賞味期限 */}
+                          <div style={{display:"flex",alignItems:"center",gap:8}}>
+                            <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif",minWidth:48}}>期限</span>
+                            <input type="date" value={editingExpiry?.id===it.id?editingExpiry.expiry:it.expiry}
+                              onChange={e=>setEditingExpiry({id:it.id,expiry:e.target.value})}
+                              onClick={e=>e.stopPropagation()}
+                              style={{flex:1,background:CD,border:"1px solid #3A3835",borderRadius:8,padding:"7px 10px",color:TX,fontSize:13,outline:"none"}}/>
+                            {editingExpiry?.id===it.id&&(
+                              <button onClick={e=>{e.stopPropagation();setFridge(f=>f.map(i=>i.id===it.id?{...i,expiry:editingExpiry.expiry}:i));setEditingExpiry(null);}}
+                                style={{background:A,border:"none",borderRadius:8,padding:"7px 12px",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",whiteSpace:"nowrap"}}>保存</button>
+                            )}
+                          </div>
+                          {/* 削除 */}
+                          <button onClick={e=>{e.stopPropagation();setFridge(fridge.filter(i=>i.id!==it.id));setExpandedItem(null);}} style={{width:"100%",marginTop:10,padding:"8px",background:"transparent",border:"1px solid "+RD+"44",borderRadius:8,color:RD,fontSize:12,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer"}}>削除する</button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -637,172 +656,57 @@ JSONのみ返答（配列で返すこと）: [{"name":"料理名","emoji":"🍳"
         </div>
       )}
 
-      {/* RECIPE */}
-      {tab==="recipe" && (
-        <div style={{padding:"18px 20px 0",animation:"fadeUp .3s ease"}}>
-          {/* Settings badges + recipe count + history */}
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-            <div style={{display:"flex",gap:6,flexWrap:"wrap"}} onClick={()=>setShowSettings(true)}>
-              {[`⏱ ${settings.maxTime}分`,`🍚 ${settings.riceSize}`,`🍽 ${settings.dishCount}`,`🧂 ${settings.spiceLevel}`,...(settings.cookStyle!=="何でも"?[`🔥 ${settings.cookStyle}`]:[])].map((b,i)=>(
-                <span key={i} style={{fontSize:11,color:BL,background:BL+"18",border:"1px solid "+BL+"33",padding:"4px 10px",borderRadius:20,cursor:"pointer"}}>{b}</span>
-              ))}
-            </div>
-            <button onClick={()=>setShowHistory(true)} style={{background:"transparent",border:"1px solid #3A3835",borderRadius:8,padding:"5px 10px",color:MU,fontSize:11,fontFamily:"'Syne',sans-serif",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>📋 履歴</button>
+      {/* 賞味期限アラート */}
+      {showExpiryAlert&&expiryAlert.length>0&&(
+        <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+          <div style={{background:CD,borderRadius:16,padding:24,border:"1px solid "+RD,width:"100%",maxWidth:320,animation:"fadeUp .2s ease"}}>
+            <p style={{fontSize:16,fontWeight:700,marginBottom:4}}>⚠️ 賞味期限まもなく</p>
+            <p style={{fontSize:12,color:MU,marginBottom:16,fontFamily:"'Noto Sans JP',sans-serif"}}>以下の食材の期限が近づいています</p>
+            {expiryAlert.map((it,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #2A2927"}}>
+                <span style={{fontSize:14,fontFamily:"'Noto Sans JP',sans-serif"}}>{it.name}</span>
+                <span style={{fontSize:12,fontWeight:700,color:ec(daysTo(it.expiry))}}>{el(daysTo(it.expiry))}</span>
+              </div>
+            ))}
+            <button onClick={()=>{setShowExpiryAlert(false);setTab("recipe");setSelIds(new Set(expiryAlert.map(i=>i.id)));}}
+              style={{width:"100%",marginTop:16,padding:"12px",background:A,border:"none",borderRadius:10,color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
+              これでレシピを作る →
+            </button>
+            <button onClick={()=>setShowExpiryAlert(false)} style={{width:"100%",marginTop:8,padding:"10px",background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer"}}>後で確認する</button>
           </div>
-          {/* Recipe count selector */}
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,background:SF,borderRadius:10,padding:"10px 14px"}}>
-            <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif"}}>レシピ提案数</span>
-            <div style={{display:"flex",gap:4,marginLeft:"auto"}}>
-              {[1,2,3].map(n=>(
-                <button key={n} onClick={()=>setRecipeCount(n)} style={{width:32,height:32,borderRadius:8,border:"none",background:recipeCount===n?A:CD,color:recipeCount===n?"#fff":MU,fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .15s"}}>{n}</button>
-              ))}
-            </div>
-          </div>
-
-          {fridge.length===0 ? (
-            <div style={{textAlign:"center",padding:"40px 0",opacity:.4}}>
-              <div style={{fontSize:40,marginBottom:12}}>🥘</div>
-              <p style={{color:MU,fontSize:14,fontFamily:"'Noto Sans JP',sans-serif"}}>まず冷蔵庫に食材を登録してください</p>
-            </div>
-          ) : (
-            <>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-                <p style={{fontSize:12,color:MU,letterSpacing:1}}>使う食材を選択</p>
-                <button onClick={()=>{setSelIds(new Set(sorted.slice(0,4).map(i=>i.id)));setSelQty({});}} style={{background:"transparent",border:"1px solid #3A3835",borderRadius:8,padding:"5px 12px",color:YW,fontSize:12,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>⚡ 期限順で自動選択</button>
-              </div>
-              {sorted.map(it=>{
-                const s=selIds.has(it.id),d=daysTo(it.expiry),c=ec(d);
-                return (
-                  <div key={it.id} onClick={()=>{const ns=new Set(selIds);ns.has(it.id)?ns.delete(it.id):ns.add(it.id);setSelIds(ns);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:s?CD:SF,borderRadius:12,marginBottom:8,border:"1px solid "+(s?A:"#2A2927"),cursor:"pointer",transition:"all .15s"}}>
-                    <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(s?A:"#3A3835"),background:s?A:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:12,color:"#fff",transition:"all .15s"}}>{s?"✓":""}</div>
-                    <p style={{flex:1,fontSize:14,fontFamily:"'Noto Sans JP',sans-serif"}}>{it.name}{it.qty>1&&<span style={{fontSize:12,color:MU,marginLeft:6}}>在庫×{it.qty}</span>}</p>
-                    <span style={{fontSize:11,color:c,background:c+"22",padding:"2px 8px",borderRadius:20}}>{el(d)}</span>
-                  </div>
-                );
-              })}
-              <button onClick={genRecipe} disabled={selIds.size===0||generating}
-                style={{width:"100%",padding:15,marginTop:8,background:selIds.size===0||generating?"#2A2927":A,color:selIds.size===0||generating?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:selIds.size===0||generating?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"all .2s"}}>
-                {generating?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>レシピを考え中…</>:`🍳 ${selIds.size}品でレシピを作る`}
-              </button>
-              {recipeErr && <p style={{color:RD,fontSize:12,marginTop:8,lineHeight:1.5}}>{recipeErr}</p>}
-            </>
-          )}
-
-          {/* Recipe result */}
-          {recipe && (
-            <div style={{marginTop:20,animation:"fadeUp .4s ease"}}>
-              <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #2E2D2B",marginBottom:8}}>
-                <div style={{fontSize:32,marginBottom:6}}>{recipe.emoji}</div>
-                <h2 style={{fontSize:20,fontWeight:800,letterSpacing:-.5}}>{recipe.name}</h2>
-                <p style={{fontSize:13,color:MU,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif"}}>{recipe.description}</p>
-                {recipe.dishes && <p style={{fontSize:11,color:MU,marginTop:5,fontFamily:"'Noto Sans JP',sans-serif"}}>🍽 {recipe.dishes}</p>}
-                <div style={{display:"flex",gap:8,marginTop:12}}>
-                  {[{i:"⏱",v:recipe.time},{i:"📊",v:recipe.difficulty},{i:"🔥",v:recipe.calories}].map((x,i)=>(
-                    <div key={i} style={{flex:1,background:CD,borderRadius:10,padding:"9px 6px",textAlign:"center"}}>
-                      <div style={{fontSize:14}}>{x.i}</div>
-                      <div style={{fontSize:11,color:TX,fontWeight:600,marginTop:2}}>{x.v}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{display:"flex",gap:2,marginBottom:10,background:SF,borderRadius:12,padding:4}}>
-                {["作り方","栄養","買い物"].map(t=>(
-                  <button key={t} onClick={()=>setRecipeTab(t)} style={{flex:1,padding:"8px 4px",background:recipeTab===t?CD:"transparent",border:"none",borderRadius:9,color:recipeTab===t?TX:MU,fontSize:13,fontWeight:recipeTab===t?700:400,fontFamily:"'Syne',sans-serif",cursor:"pointer",transition:"all .2s"}}>
-                    {t}{t==="買い物"&&recipe.missing?.length?` (${recipe.missing.length})`:""}
-                  </button>
-                ))}
-              </div>
-
-              <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #2E2D2B"}}>
-                {recipeTab==="作り方" && (
-                  <div>
-                    {(recipe.steps||[]).map((s,i)=>(
-                      <div key={i} style={{display:"flex",gap:12,marginBottom:14}}>
-                        <div style={{width:24,height:24,borderRadius:"50%",background:i===0?A:CD,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,flexShrink:0,color:i===0?"#fff":MU}}>{i+1}</div>
-                        <p style={{fontSize:14,lineHeight:1.7,color:TX,fontFamily:"'Noto Sans JP',sans-serif",paddingTop:2}}>{s}</p>
-                      </div>
-                    ))}
-                    {recipe.tip && <div style={{marginTop:12,background:CD,borderRadius:10,padding:"11px 13px",borderLeft:"3px solid "+GN,display:"flex",gap:10}}><span>💡</span><p style={{fontSize:13,color:TX,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.6}}>{recipe.tip}</p></div>}
-                  </div>
-                )}
-                {recipeTab==="栄養" && (
-                  <div>
-                    {[{l:"カロリー",v:recipe.calories,m:800,c:A},{l:"タンパク質",v:recipe.protein,m:60,c:GN},{l:"炭水化物",v:recipe.carbs,m:100,c:BL},{l:"脂質",v:recipe.fat,m:50,c:YW}].map((n,i)=>(
-                      <div key={i} style={{marginBottom:12}}>
-                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:12,color:MU}}>{n.l}</span><span style={{fontSize:12,color:TX}}>{n.v}</span></div>
-                        <div style={{height:4,background:"#2A2927",borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:Math.min((parseInt(n.v)/n.m)*100,100)+"%",background:n.c,borderRadius:2,transition:"width .8s"}}/></div>
-                      </div>
-                    ))}
-                    <p style={{fontSize:11,color:MU,marginTop:12,textAlign:"center",fontFamily:"'Noto Sans JP',sans-serif"}}>※ 目安値です</p>
-                  </div>
-                )}
-                {recipeTab==="買い物" && (
-                  <div>
-                    {!recipe.missing?.length ? (
-                      <div style={{textAlign:"center",padding:"16px 0"}}><p style={{fontSize:22,marginBottom:6}}>✅</p><p style={{color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif"}}>追加食材なし！</p></div>
-                    ) : recipe.missing.map((name,i)=>(
-                      <div key={i} onClick={()=>{const s=new Set(shopChk);s.has(i)?s.delete(i):s.add(i);setShopChk(s);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 0",borderBottom:"1px solid #2A2927",cursor:"pointer"}}>
-                        <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(shopChk.has(i)?GN:"#3A3835"),background:shopChk.has(i)?GN:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:11,color:"#fff",transition:"all .2s"}}>{shopChk.has(i)?"✓":""}</div>
-                        <span style={{fontSize:14,fontFamily:"'Noto Sans JP',sans-serif",textDecoration:shopChk.has(i)?"line-through":"none",color:shopChk.has(i)?MU:TX}}>{name}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        {/* Cook confirm buttons */}
-        {pendingRecipe && recipe && (
-          <div style={{padding:"0 20px",marginTop:8}}>
-            {pendingRecipe.recipes.length > 1 && (
-              <div style={{background:SF,borderRadius:12,padding:"12px 14px",border:"1px solid #2A2927",marginBottom:8}}>
-                <p style={{fontSize:11,color:MU,marginBottom:10,fontFamily:"'Noto Sans JP',sans-serif"}}>他のレシピ候補</p>
-                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                  {pendingRecipe.recipes.map((r,i)=>(
-                    <button key={i} onClick={()=>{setRecipe(r);setRecipeTab("作り方");setShopChk(new Set());}}
-                      style={{padding:"6px 14px",background:recipe===r?A:CD,border:"1px solid "+(recipe===r?A:"#3A3835"),borderRadius:20,color:recipe===r?"#fff":TX,fontSize:12,cursor:"pointer",fontFamily:"'Noto Sans JP',sans-serif"}}>
-                      {r.emoji} {r.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            <div style={{display:"flex",gap:8,paddingBottom:20}}>
-              <button onClick={()=>{
-                const aiUsedQty = recipe.usedQty || {};
-                setFridge(prev=>prev.map(item=>{
-                  if(!pendingRecipe.chosenIds.has(item.id))return item;
-                  const used=aiUsedQty[item.name]||1;
-                  const remaining=item.qty-used;
-                  if(remaining<=0)return null;
-                  return {...item,qty:remaining};
-                }).filter(Boolean));
-                setPendingRecipe(null);
-              }} style={{flex:1,padding:"13px",background:GN,border:"none",borderRadius:12,color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
-                ✅ 作った！
-              </button>
-              <button onClick={()=>{
-                setFridge(pendingRecipe.fridgeSnapshot);
-                setPendingRecipe(null);
-                setRecipe(null);
-              }} style={{flex:1,padding:"13px",background:CD,border:"1px solid #3A3835",borderRadius:12,color:MU,fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
-                ✕ やめた
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
       )}
 
-      {/* History Modal */}
-      {showHistory && (
+      {/* 履歴モーダル */}
+      {showHistory&&(
         <div onClick={()=>setShowHistory(false)} style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
           <div onClick={e=>e.stopPropagation()} style={{background:BG,borderRadius:"20px 20px 0 0",padding:"24px 20px 40px",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .25s ease",maxHeight:"80vh",overflowY:"auto"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-              <span style={{fontSize:15,fontWeight:700}}>📋 レシピ履歴</span>
+              <span style={{fontSize:15,fontWeight:700}}>📋 履歴 & お気に入り</span>
               <button onClick={()=>setShowHistory(false)} style={{background:"none",border:"none",color:MU,fontSize:22,cursor:"pointer"}}>×</button>
             </div>
+            {/* 累計節約額 */}
+            {totalSaved>0&&(
+              <div style={{background:GN+"18",border:"1px solid "+GN+"44",borderRadius:12,padding:"14px 16px",marginBottom:16,textAlign:"center"}}>
+                <p style={{fontSize:11,color:GN,marginBottom:4}}>累計節約額</p>
+                <p style={{fontSize:28,fontWeight:800,color:GN}}>¥{totalSaved.toLocaleString()}</p>
+              </div>
+            )}
+            {favorites.length>0&&(
+              <div style={{marginBottom:20}}>
+                <p style={{fontSize:11,color:MU,marginBottom:10,letterSpacing:1}}>❤️ お気に入り</p>
+                {favorites.map((r,i)=>(
+                  <div key={i} style={{background:SF,borderRadius:12,padding:"12px 14px",marginBottom:6,border:"1px solid #2A2927",display:"flex",alignItems:"center",gap:12}}>
+                    <span style={{fontSize:24}}>{r.emoji}</span>
+                    <div style={{flex:1}}>
+                      <p style={{fontSize:14,fontWeight:700}}>{r.name}</p>
+                      <p style={{fontSize:11,color:MU,marginTop:2,fontFamily:"'Noto Sans JP',sans-serif"}}>{r.time} / {r.calories}</p>
+                    </div>
+                    <button onClick={()=>toggleFavorite(r)} style={{background:"none",border:"none",fontSize:18,cursor:"pointer"}}>❤️</button>
+                  </div>
+                ))}
+              </div>
+            )}
             {recipeHistory.length===0?(
               <div style={{textAlign:"center",padding:"30px 0",opacity:.4}}>
                 <p style={{fontSize:32,marginBottom:8}}>🍽</p>
@@ -826,8 +730,8 @@ JSONのみ返答（配列で返すこと）: [{"name":"料理名","emoji":"🍳"
         </div>
       )}
 
-      {/* Settings Modal */}
-      {showSettings && (
+      {/* 設定モーダル */}
+      {showSettings&&(
         <div onClick={()=>setShowSettings(false)} style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
           <div onClick={e=>e.stopPropagation()} style={{background:BG,borderRadius:"20px 20px 0 0",padding:"24px 20px 40px",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .25s ease"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
@@ -851,8 +755,8 @@ JSONのみ返答（配列で返すこと）: [{"name":"料理名","emoji":"🍳"
         </div>
       )}
 
-      {/* Reset Modal */}
-      {showReset && (
+      {/* リセット確認 */}
+      {showReset&&(
         <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
           <div style={{background:CD,borderRadius:16,padding:24,border:"1px solid #3A3835",width:"100%",maxWidth:320,animation:"fadeUp .2s ease"}}>
             <p style={{fontSize:16,fontWeight:700,marginBottom:8}}>冷蔵庫をリセット</p>
@@ -868,10 +772,9 @@ JSONのみ返答（配列で返すこと）: [{"name":"料理名","emoji":"🍳"
   );
 }
 
-// ---- Root ----
-export default function App() {
-  const [user, setUser] = useState(undefined);
-  useEffect(() => { return onAuthStateChanged(auth, u => setUser(u)); }, []);
-  if (user === undefined) return <div style={{minHeight:"100vh",background:"#0F0E0C",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{width:32,height:32,border:"3px solid #333",borderTopColor:"#FF6B35",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/><style>{"@keyframes spin{to{transform:rotate(360deg)}}"}</style></div>;
-  return user ? <MainApp user={user}/> : <LoginScreen/>;
+export default function App(){
+  const[user,setUser]=useState(undefined);
+  useEffect(()=>{return onAuthStateChanged(auth,u=>setUser(u));},[]);
+  if(user===undefined)return<div style={{minHeight:"100vh",background:"#0F0E0C",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{width:32,height:32,border:"3px solid #333",borderTopColor:"#FF6B35",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/><style>{"@keyframes spin{to{transform:rotate(360deg)}}"}</style></div>;
+  return user?<MainApp user={user}/>:<LoginScreen/>;
 }
