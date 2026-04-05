@@ -21,7 +21,7 @@ const CHANGELOG=[
   {version:"0.2.0",date:"2026/04/05",changes:["ユーザーごとのデータ分離（Upstash Redis）","新規ユーザー登録機能","レシピ提案数の選択（1〜3個）","レシピ履歴・お気に入り機能","作った！/やめた ボタン","食材の保存場所カテゴリ（冷蔵・冷凍・常温）","スワイプ削除","賞味期限の通知"]},
   {version:"0.1.0",date:"2026/04/02",changes:["初回リリース","Firebase認証","レシートスキャン","レシピ生成","賞味期限管理"]}
 ];
-const DS={maxTime:30,dishCount:"少なめ",spiceLevel:"普通",cookStyle:"何でも",riceSize:"普通"};
+const DS={maxTime:10,dishCount:"少なめ",spiceLevel:"普通",riceSize:"普通"};
 const CONVENIENCE_PRICE=598,RESTAURANT_PRICE=880,DELIVERY_PRICE=1200;
 
 const EM={"鶏肉":3,"鶏むね":3,"鶏もも":3,"豚肉":3,"豚バラ":3,"牛肉":3,"ひき肉":2,"合い挽き":2,"魚":2,"刺身":1,"サーモン":2,"マグロ":1,"ベーコン":7,"ハム":7,"ウインナー":7,"ソーセージ":7,"牛乳":7,"豆腐":4,"卵":21,"チーズ":14,"バター":30,"ヨーグルト":14,"生クリーム":7,"レタス":5,"キャベツ":14,"ほうれん草":4,"小松菜":4,"ねぎ":7,"長ねぎ":7,"玉ねぎ":30,"にんじん":21,"じゃがいも":30,"トマト":5,"きゅうり":5,"なす":5,"ピーマン":7,"ブロッコリー":5,"もやし":3,"白菜":14,"しめじ":5,"えのき":5,"しいたけ":5,"まいたけ":5,"納豆":7,"こんにゃく":7,"油揚げ":5,"厚揚げ":4,"エビ":2,"イカ":2,"アジ":2,"サバ":2,"ブリ":2,"ホタテ":2,"あさり":2,"ツナ":1095};
@@ -353,9 +353,9 @@ function MainApp({user}){
     setGenerating(true);setRecipeErr("");setRecipe(null);setPendingRecipe(null);
     const fridgeSnapshot=fridgeData||[...fridge];
     try{
-      const{maxTime,dishCount,spiceLevel,cookStyle,riceSize}=settings;
+      const{maxTime,dishCount,spiceLevel,riceSize}=settings;
       const dn=dishCount==="少なめ"?"できるだけ少ない調理器具で":dishCount==="多くてもOK"?"洗い物は気にしない":"洗い物は普通程度で";
-      const styleGuide=cookStyle==="何でも"?"デフォルトは和食（煮物・炒め物・丼・汁物など）を優先。前回と異なるジャンルにすること":cookStyle+"を優先";
+      const styleGuide="デフォルトは和食（煮物・炒め物・丼・汁物など）を優先。バリエーションとして洋食・中華も可";
       const ingredientList=chosen.map(i=>`${i.name}(在庫${i.qty}個)`).join(", ");
       const p=`食材: ${ingredientList}。1人分のレシピを1つ提案。条件: ${maxTime}分以内、${dn}、味は${spiceLevel}、ご飯の量は${riceSize}、${styleGuide}。
 ご飯の量に合わせて各食材の適切な使用個数をAIが判断。在庫数を超えないこと。
@@ -382,9 +382,9 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
     setGenerating(true);setRecipeErr("");setRecipe(null);setPendingRecipe(null);
     const fridgeSnapshot=[...fridge];
     try{
-      const{maxTime,dishCount,spiceLevel,cookStyle,riceSize}=settings;
+      const{maxTime,dishCount,spiceLevel,riceSize}=settings;
       const dn=dishCount==="少なめ"?"できるだけ少ない調理器具で":dishCount==="多くてもOK"?"洗い物は気にしない":"洗い物は普通程度で";
-      const styleGuide=cookStyle==="何でも"?"デフォルトは和食（煮物・炒め物・丼・汁物など）を優先。バリエーションとして洋食・中華も可":cookStyle+"を優先";
+      const styleGuide="デフォルトは和食（煮物・炒め物・丼・汁物など）を優先。バリエーションとして洋食・中華も可";
       const ingredientList=chosen.map(i=>`${i.name}(在庫${i.qty}個)`).join(", ");
       const p=`食材: ${ingredientList}。1人分のレシピを1つ提案。条件: ${maxTime}分以内、${dn}、味は${spiceLevel}、ご飯の量は${riceSize}、${styleGuide}。
 ご飯の量に合わせて各食材の適切な使用個数をAIが判断。在庫数を超えないこと。
@@ -416,7 +416,8 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
       if(remaining<=0)return null;
       return{...item,qty:remaining};
     }).filter(Boolean));
-    addSavings(pendingRecipe.recipe.estimatedCost||200);
+    const cost=pendingRecipe.recipe.estimatedCost&&pendingRecipe.recipe.estimatedCost>0&&pendingRecipe.recipe.estimatedCost<800?pendingRecipe.recipe.estimatedCost:180;
+    addSavings(cost);
     setPendingRecipe(null);
     setRecipe(null);
     setTab("fridge");
@@ -470,7 +471,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
         </div>
         {menuOpen&&(
           <div style={{position:"absolute",top:"100%",right:16,zIndex:100,background:CD,border:"1px solid #3A3835",borderRadius:12,padding:8,minWidth:160,animation:"slideDown .2s ease",boxShadow:"0 8px 32px rgba(0,0,0,.5)"}}>
-            {[{label:"⚙️ 設定",fn:()=>{setShowSettings(true);setMenuOpen(false);}},{label:"🚪 ログアウト",fn:()=>{signOut(auth);setMenuOpen(false);}},{label:"🗑 冷蔵庫をリセット",fn:()=>{setShowReset(true);setMenuOpen(false);},danger:true}].map((item,i)=>(
+            {[{label:"⚙️ レシピ設定",fn:()=>{setShowSettings(true);setMenuOpen(false);}},{label:"🚪 ログアウト",fn:()=>{signOut(auth);setMenuOpen(false);}},{label:"🗑 冷蔵庫をリセット",fn:()=>{setShowReset(true);setMenuOpen(false);},danger:true}].map((item,i)=>(
               <button key={i} onClick={item.fn} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"10px 12px",background:"none",border:"none",color:item.danger?RD:TX,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",borderRadius:8,cursor:"pointer",textAlign:"left"}}>{item.label}</button>
             ))}
           </div>
@@ -488,20 +489,27 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
       {tab==="recipe"&&(
         <div style={{padding:"18px 20px 0",animation:"fadeUp .3s ease"}}>
 
-          {/* 設定バッジ */}
-          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}} onClick={()=>setShowSettings(true)}>
-            {[`⏱ ${settings.maxTime}分`,`🍚 ${settings.riceSize}`,`🍽 ${settings.dishCount}`,`🧂 ${settings.spiceLevel}`,...(settings.cookStyle!=="何でも"?[`🔥 ${settings.cookStyle}`]:[])].map((b,i)=>(
-              <span key={i} style={{fontSize:11,color:BL,background:BL+"18",border:"1px solid "+BL+"33",padding:"4px 10px",borderRadius:20,cursor:"pointer"}}>{b}</span>
-            ))}
-          </div>
+
 
           {/* 食材選択 */}
           {fridge.length===0?(
-            <div style={{textAlign:"center",padding:"40px 20px",background:SF,borderRadius:16,border:"1px dashed #3A3835"}}>
+            <div style={{textAlign:"center",padding:"32px 20px",background:SF,borderRadius:16,border:"1px dashed #3A3835"}}>
               <div style={{fontSize:40,marginBottom:12}}>🛒</div>
               <p style={{fontSize:15,fontWeight:700,marginBottom:8}}>冷蔵庫が空です</p>
-              <p style={{color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.7,marginBottom:16}}>レシートをスキャンして食材を登録すると<br/>AIがレシピを提案します</p>
-              <button onClick={()=>setTab("fridge")} style={{background:A,border:"none",borderRadius:10,padding:"11px 24px",color:"#fff",fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>食材を登録する →</button>
+              <p style={{color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.7,marginBottom:20}}>レシートをスキャンして食材を登録すると<br/>AIがレシピを提案します</p>
+              <button onClick={()=>setTab("fridge")} style={{background:A,border:"none",borderRadius:12,padding:"13px 28px",color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>食材を登録する →</button>
+              <div style={{marginTop:24,textAlign:"left"}}>
+                <p style={{fontSize:11,color:MU,marginBottom:10,letterSpacing:1}}>例えばこんな食材があれば…</p>
+                {[{emoji:"🥚",name:"卵・玉ねぎ・だし",recipe:"親子丼 約¥120"},{emoji:"🐷",name:"豚肉・キャベツ",recipe:"回鍋肉 約¥180"},{emoji:"🍅",name:"トマト・ツナ缶",recipe:"ツナトマトパスタ 約¥150"}].map((s,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",background:CD,borderRadius:10,marginBottom:6}}>
+                    <span style={{fontSize:22}}>{s.emoji}</span>
+                    <div style={{flex:1}}>
+                      <p style={{fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",color:TX}}>{s.name}</p>
+                      <p style={{fontSize:11,color:GN,marginTop:2}}>→ {s.recipe}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ):(
             <>
@@ -544,23 +552,26 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                 <p style={{fontSize:13,color:MU,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.6}}>{recipe.description}</p>
 
                 {/* 節約額表示 */}
-                {recipe.estimatedCost&&(
-                  <div style={{marginTop:14,background:CD,borderRadius:12,padding:"12px 14px",border:"1px solid #3A3835"}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                      <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif"}}>この料理の食材費</span>
-                      <span style={{fontSize:18,fontWeight:800,color:TX}}>約 ¥{recipe.estimatedCost}</span>
+                {(()=>{
+                  const cost=recipe.estimatedCost&&recipe.estimatedCost>0&&recipe.estimatedCost<800?recipe.estimatedCost:180;
+                  return(
+                    <div style={{marginTop:14,background:CD,borderRadius:12,padding:"12px 14px",border:"1px solid #3A3835"}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                        <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif"}}>この料理の食材費（目安）</span>
+                        <span style={{fontSize:18,fontWeight:800,color:TX}}>約 ¥{cost}</span>
+                      </div>
+                      {[{label:"vs コンビニ弁当",price:CONVENIENCE_PRICE},{label:"vs 外食",price:RESTAURANT_PRICE},{label:"vs デリバリー",price:DELIVERY_PRICE}].map((c,i)=>{
+                        const saved=c.price-cost;
+                        return(
+                          <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderTop:"1px solid #2A2927"}}>
+                            <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif"}}>{c.label} <span style={{color:"#555"}}>¥{c.price}</span></span>
+                            <span style={{fontSize:13,fontWeight:700,color:saved>0?GN:MU}}>{saved>0?`¥${saved} お得`:"±0"}</span>
+                          </div>
+                        );
+                      })}
                     </div>
-                    {[{label:"vs コンビニ弁当",price:CONVENIENCE_PRICE},{label:"vs 外食",price:RESTAURANT_PRICE},{label:"vs デリバリー",price:DELIVERY_PRICE}].map((c,i)=>{
-                      const saved=c.price-recipe.estimatedCost;
-                      return(
-                        <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderTop:"1px solid #2A2927"}}>
-                          <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif"}}>{c.label} <span style={{color:"#444"}}>¥{c.price}</span></span>
-                          <span style={{fontSize:13,fontWeight:700,color:saved>0?GN:MU}}>{saved>0?`¥${saved} お得`:"±0"}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                  );
+                })()}
 
                 <div style={{display:"flex",gap:8,marginTop:12}}>
                   {[{i:"⏱",v:recipe.time},{i:"📊",v:recipe.difficulty},{i:"🔥",v:recipe.calories}].map((x,i)=>(
@@ -909,8 +920,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
             <Seg label="🍚 ご飯の量" options={["小","普通","大","大盛り"]} value={settings.riceSize} onChange={v=>setSettings({...settings,riceSize:v})}/>
             <Seg label="🍽 洗い物の量" options={["少なめ","普通","多くてもOK"]} value={settings.dishCount} onChange={v=>setSettings({...settings,dishCount:v})}/>
             <Seg label="🧂 味の濃さ" options={["薄め","普通","濃いめ"]} value={settings.spiceLevel} onChange={v=>setSettings({...settings,spiceLevel:v})}/>
-            <Seg label="🔥 調理スタイル" options={["何でも","炒め物","煮物","レンジ"]} value={settings.cookStyle} onChange={v=>setSettings({...settings,cookStyle:v})}/>
-            <button onClick={()=>setSettings({...DS})} style={{width:"100%",marginTop:4,padding:11,background:"transparent",border:"1px solid #3A3835",borderRadius:10,color:MU,fontSize:13,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>デフォルトに戻す</button>
+            <button onClick={()=>setSettings({...DS})} style={{width:"100%",marginTop:8,padding:11,background:"transparent",border:"1px solid #3A3835",borderRadius:10,color:MU,fontSize:13,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>デフォルトに戻す</button>
           </div>
         </div>
       )}
