@@ -19,7 +19,66 @@ const A = "#FF6B35", BG = "#0F0E0C", SF = "#1A1916", CD = "#232220";
 const TX = "#F5F0E8", MU = "#6B6760", GN = "#4CAF7D", YW = "#FFB830";
 const RD = "#FF5555", BL = "#4A9EFF";
 
-const EM = {"鶏肉":3,"豚肉":3,"牛肉":3,"ひき肉":2,"魚":2,"刺身":1,"サーモン":2,"マグロ":2,"ベーコン":7,"ハム":7,"ウインナー":7,"ソーセージ":7,"牛乳":7,"豆腐":4,"卵":21,"チーズ":14,"バター":30,"ヨーグルト":14,"生クリーム":7,"レタス":5,"キャベツ":14,"ほうれん草":4,"小松菜":4,"ねぎ":7,"長ねぎ":7,"玉ねぎ":30,"にんじん":21,"じゃがいも":30,"トマト":5,"きゅうり":5,"なす":5,"ピーマン":7,"ブロッコリー":5,"もやし":3,"白菜":14,"しめじ":5,"えのき":5,"しいたけ":5,"まいたけ":5,"納豆":7,"こんにゃく":7,"油揚げ":5,"厚揚げ":4};
+const EM = {
+  // 肉類
+  "鶏肉":3,"鶏むね":3,"鶏もも":3,"鶏ささみ":3,"鶏皮":3,"手羽":3,
+  "豚肉":3,"豚バラ":3,"豚ロース":3,"豚こま":3,"豚ひれ":3,
+  "牛肉":3,"牛バラ":3,"牛ロース":3,"和牛":3,
+  "ひき肉":2,"合い挽き":2,"鶏ひき":2,"豚ひき":2,"牛ひき":2,
+  "ミンチ":2,"レバー":2,"ホルモン":2,
+  // 魚介類
+  "魚":2,"刺身":1,"さしみ":1,"刺し身":1,
+  "サーモン":2,"鮭":3,"サバ":2,"さば":2,"アジ":2,"あじ":2,
+  "マグロ":1,"まぐろ":1,"ブリ":2,"ぶり":2,"タイ":2,"たい":2,
+  "エビ":2,"えび":2,"イカ":2,"いか":2,"タコ":3,"たこ":3,
+  "ホタテ":2,"はまぐり":1,"あさり":2,"シジミ":2,"かき":2,
+  "ツナ":1095,"缶詰":365,
+  // 加工肉
+  "ベーコン":7,"ハム":7,"ウインナー":7,"ソーセージ":7,
+  "サラミ":14,"コンビーフ":3,
+  // 乳製品・卵
+  "牛乳":7,"ミルク":7,"豆乳":7,
+  "卵":21,"たまご":21,"玉子":21,
+  "チーズ":14,"スライスチーズ":14,"クリームチーズ":14,
+  "バター":30,"マーガリン":30,
+  "ヨーグルト":14,"生クリーム":7,"ホイップ":7,
+  // 豆腐・大豆製品
+  "豆腐":4,"絹豆腐":4,"木綿豆腐":4,"絹ごし":4,
+  "厚揚げ":4,"油揚げ":5,"がんも":4,"豆腐":4,
+  "納豆":7,"おから":3,"湯葉":3,
+  // 野菜
+  "レタス":5,"サラダ菜":4,"水菜":5,"春菊":4,"ほうれん草":4,"小松菜":4,
+  "キャベツ":14,"紫キャベツ":14,"白菜":14,"チンゲン菜":5,
+  "ねぎ":7,"長ねぎ":7,"小ねぎ":5,"万能ねぎ":5,"わけぎ":5,
+  "玉ねぎ":30,"新玉ねぎ":10,"赤玉ねぎ":30,
+  "にんじん":21,"大根":14,"かぶ":7,"ごぼう":14,"れんこん":14,
+  "じゃがいも":30,"さつまいも":30,"里芋":14,"山芋":14,"長芋":14,
+  "トマト":5,"ミニトマト":7,"プチトマト":7,
+  "きゅうり":5,"なす":5,"ズッキーニ":5,"オクラ":3,
+  "ピーマン":7,"パプリカ":10,"唐辛子":7,
+  "ブロッコリー":5,"カリフラワー":7,"アスパラ":4,"セロリ":7,
+  "もやし":3,"豆もやし":3,"枝豆":3,
+  "しめじ":5,"えのき":5,"しいたけ":5,"まいたけ":5,"エリンギ":7,"なめこ":5,
+  "アボカド":3,"コーン":3,"とうもろこし":3,
+  "生姜":14,"しょうが":14,"にんにく":30,"ガーリック":30,
+  // 果物
+  "いちご":4,"苺":4,"バナナ":5,"りんご":14,"みかん":14,
+  "オレンジ":14,"グレープフルーツ":14,"レモン":14,"ライム":14,
+  "ぶどう":5,"桃":4,"もも":4,"梨":7,"なし":7,"柿":7,
+  "キウイ":7,"メロン":5,"スイカ":5,"パイナップル":5,
+  // 練り物・加工食品
+  "かまぼこ":7,"ちくわ":7,"はんぺん":4,"さつま揚げ":4,
+  "こんにゃく":7,"しらたき":7,
+  // 惣菜・調理済み
+  "惣菜":2,"弁当":1,"おにぎり":1,"サラダ":2,"揚げ物":2,"から揚げ":2,
+  // パン・麺
+  "食パン":5,"パン":4,"バゲット":2,"ベーグル":3,
+  "生麺":3,"うどん":3,"そば":3,"ラーメン":3,"パスタ":3,
+  // その他
+  "もずく":14,"わかめ":14,"昆布":30,"のり":180,
+  "漬物":14,"キムチ":30,"梅干し":365,
+  "味噌":90,"みそ":90,
+};
 const DS = {maxTime:30,dishCount:"少なめ",spiceLevel:"普通",cookStyle:"何でも",riceSize:"普通"};
 
 function predExp(name, pd) {
@@ -41,6 +100,26 @@ function xj(t) {
 }
 function sv(k,v) { try { localStorage.setItem(k,JSON.stringify(v)); } catch(e) {} }
 function ld(k,d) { try { const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch(e) { return d; } }
+
+// Cloud sync helpers
+async function cloudGet(uid, key, def) {
+  try {
+    const res = await fetch(`/api/data?action=get&key=${key}`, {
+      headers: { Authorization: `Bearer ${uid}` }
+    });
+    const data = await res.json();
+    return data.value ? JSON.parse(data.value) : def;
+  } catch(e) { return def; }
+}
+async function cloudSet(uid, key, value) {
+  try {
+    await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${uid}` },
+      body: JSON.stringify({ action: 'set', key, value: JSON.stringify(value) })
+    });
+  } catch(e) {}
+}
 
 // ---- Segment Control ----
 function Seg({label, options, value, onChange}) {
@@ -237,10 +316,11 @@ function SignupModal({ onClose }) {
 }
 
 // ---- Main App ----
-function MainApp() {
+function MainApp({ user }) {
   const [tab, setTab] = useState("fridge");
   const [fridge, setFridgeState] = useState(() => ld("fridge",[]));
   const [settings, setSettingsState] = useState(() => ({...DS,...ld("settings",{})}));
+  const [syncing, setSyncing] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showReset, setShowReset] = useState(false);
@@ -251,11 +331,16 @@ function MainApp() {
   const [scanData, setScanData] = useState(null);
   const [cfmSel, setCfmSel] = useState(new Set());
   const [manualOpen, setManualOpen] = useState(false);
+  const [editingExpiry, setEditingExpiry] = useState(null); // {id, expiry}
   const [mName, setMName] = useState("");
   const [mQty, setMQty] = useState(1);
   const [mDate, setMDate] = useState(new Date().toISOString().split("T")[0]);
   const [selIds, setSelIds] = useState(new Set());
   const [selQty, setSelQty] = useState({});
+  const [recipeCount, setRecipeCount] = useState(1);
+  const [recipeHistory, setRecipeHistory] = useState(() => ld("recipeHistory",[]));
+  const [showHistory, setShowHistory] = useState(false);
+  const [pendingRecipe, setPendingRecipe] = useState(null); // {recipes, chosenIds, fridgeSnapshot}
   const [generating, setGenerating] = useState(false);
   const [recipe, setRecipe] = useState(null);
   const [recipeTab, setRecipeTab] = useState("作り方");
@@ -263,8 +348,29 @@ function MainApp() {
   const [shopChk, setShopChk] = useState(new Set());
   const fileRef = useRef();
 
-  const setFridge = v => { setFridgeState(v); sv("fridge",v); };
-  const setSettings = v => { setSettingsState(v); sv("settings",v); };
+  const setFridge = v => { setFridgeState(v); sv("fridge",v); cloudSet(user.uid,"fridge",v); };
+  const setSettings = v => { setSettingsState(v); sv("settings",v); cloudSet(user.uid,"settings",v); };
+  const addToHistory = (recipes) => {
+    const entry = { id: Date.now(), date: new Date().toLocaleDateString("ja-JP"), recipes };
+    const newHistory = [entry, ...recipeHistory].slice(0, 30);
+    setRecipeHistory(newHistory);
+    sv("recipeHistory", newHistory);
+    cloudSet(user.uid, "recipeHistory", newHistory);
+  };
+
+  // Load from cloud on mount
+  useEffect(() => {
+    Promise.all([
+      cloudGet(user.uid, "fridge", []),
+      cloudGet(user.uid, "settings", DS),
+      cloudGet(user.uid, "recipeHistory", [])
+    ]).then(([f, s, h]) => {
+      if (f && f.length > 0) { setFridgeState(f); sv("fridge", f); }
+      setSettingsState(prev => ({...DS, ...s}));
+      if (h && h.length > 0) { setRecipeHistory(h); sv("recipeHistory", h); }
+      setSyncing(false);
+    }).catch(() => setSyncing(false));
+  }, [user.uid]);
 
   const sorted = [...fridge].sort((a,b) => new Date(a.expiry)-new Date(b.expiry));
 
@@ -311,7 +417,7 @@ function MainApp() {
         system:"あなたは日本のスーパーやコンビニのレシートを読み取る専門家です。JSONのみ返してください。",
         messages:[{role:"user",content:[
           {type:"image",source:{type:"base64",media_type:file.type||"image/jpeg",data:b64}},
-          {type:"text",text:"このレシート画像を読み取ってください。今日は"+today+"です。\nJSONのみで返答:{\"store\":\"店名\",\"date\":\"YYYY-MM-DD\",\"items\":[{\"name\":\"商品名\",\"price\":198,\"qty\":1}]}\nルール:1.日付はYYYY-MM-DD(令和6年=2024年)不明なら"+today+" 2.全商品を列挙 3.消費税・合計・支払方法は除外"}
+          {type:"text",text:"このレシート画像を注意深く読み取ってください。今日は"+today+"です。\nJSONのみで返答（マークダウン不要）:\n{\"store\":\"店名\",\"date\":\"YYYY-MM-DD\",\"items\":[{\"name\":\"商品名\",\"price\":198,\"qty\":1,\"expiryDays\":7}]}\n\nルール:\n1. 日付はYYYY-MM-DD形式(令和6年=2024年)。不明なら"+today+"\n2. 全商品を列挙。消費税・合計・支払方法は除外\n3. expiryDaysは購入日からの賞味期限日数をAIが推定:\n   刺身・生魚:1-2日 / 生肉・ひき肉:2-3日 / 加工肉:7日\n   豆腐:4日 / 納豆:7日 / 卵:21日 / 牛乳:7日 / チーズ:14日\n   葉物野菜:4-5日 / 根菜:14-30日 / 果物:3-7日\n   惣菜・弁当:1-2日 / パン:3-5日 / 冷凍品:90日 / 缶詰:365日"}
         ]}]
       })});
       if(!res.ok){const t=await res.text();setScanErr("APIエラー("+res.status+"): "+t.slice(0,80));return;}
@@ -330,7 +436,17 @@ function MainApp() {
   const confirmScan = () => {
     if(!scanData) return;
     const pd = scanData.date||new Date().toISOString().split("T")[0];
-    const newItems = scanData.items.filter((_,i)=>cfmSel.has(i)).map(it=>({id:Date.now()+"_"+it.name+"_"+Math.random(),name:it.name,purchaseDate:pd,expiry:predExp(it.name,pd),qty:it.qty||1}));
+    const newItems = scanData.items.filter((_,i)=>cfmSel.has(i)).map(it=>{
+      let expiry;
+      if (it.expiryDays) {
+        const d = new Date(pd);
+        d.setDate(d.getDate() + it.expiryDays);
+        expiry = d.toISOString().split("T")[0];
+      } else {
+        expiry = predExp(it.name, pd);
+      }
+      return {id:Date.now()+"_"+it.name+"_"+Math.random(),name:it.name,purchaseDate:pd,expiry,qty:it.qty||1};
+    });
     setFridge([...fridge,...newItems]);
     setScanData(null);
   };
@@ -343,28 +459,23 @@ function MainApp() {
       const {maxTime,dishCount,spiceLevel,cookStyle,riceSize} = settings;
       const dn = dishCount==="少なめ"?"できるだけ少ない調理器具で":dishCount==="多くてもOK"?"洗い物は気にしない":"洗い物は普通程度で";
       const ingredientList = chosen.map(i=>`${i.name}(在庫${i.qty}個)`).join(", ");
-      const p = `食材: ${ingredientList}。1人分のレシピ1つ。条件: ${maxTime}分以内、${dn}、味は${spiceLevel}、ご飯の量は${riceSize}${cookStyle!=="何でも"?"、"+cookStyle+"を優先":""}。
+      const styleGuide = cookStyle==="何でも" ? "デフォルトは和食（煮物・炒め物・丼・汁物など）を優先。バリエーションとして洋食・中華も可" : cookStyle+"を優先";
+      const p = `食材: ${ingredientList}。1人分のレシピを${recipeCount}つ提案。条件: ${maxTime}分以内、${dn}、味は${spiceLevel}、ご飯の量は${riceSize}、${styleGuide}。
 ご飯の量(${riceSize})に合わせて各食材の適切な使用個数をAIが判断すること。在庫数を超えないこと。
-JSONのみ返答: {"name":"料理名","emoji":"🍳","time":"15分","difficulty":"簡単","description":"説明","calories":"400kcal","protein":"15g","carbs":"50g","fat":"10g","steps":["手順1","手順2","手順3"],"missing":[],"tip":"コツ","dishes":"使う調理器具","usedQty":{"食材名":使用個数}}
-usedQtyには使用する食材名と個数を必ず含めること。`;
+${recipeCount}つのレシピはそれぞれ異なる料理ジャンル・調理法にすること。
+JSONのみ返答（配列で返すこと）: [{"name":"料理名","emoji":"🍳","time":"15分","difficulty":"簡単","description":"説明","calories":"400kcal","protein":"15g","carbs":"50g","fat":"10g","steps":["手順1","手順2","手順3"],"missing":[],"tip":"コツ","dishes":"使う調理器具","usedQty":{"食材名":使用個数}}]`;
       const h = {"Content-Type":"application/json"};
       const res = await fetch("/api/chat",{method:"POST",headers:h,body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:"日本語でJSONのみで返答。マークダウン不要。",messages:[{role:"user",content:p}]})});
       if(!res.ok){const t=await res.text();setRecipeErr("APIエラー("+res.status+"): "+t.slice(0,80));return;}
       const data = await res.json();
-      const parsed = xj((data.content||[]).map(b=>b.text||"").join(""));
+      const rawText = (data.content||[]).map(b=>b.text||"").join("");
+      const parsed = xj(rawText);
       if(!parsed){setRecipeErr("パースエラー。もう一度試してください。");return;}
-      setRecipe(parsed); setRecipeTab("作り方"); setShopChk(new Set());
-      // Use AI-decided quantities, fall back to 1 if not specified
-      const aiUsedQty = parsed.usedQty || {};
-      setFridge(prev => {
-        return prev.map(item => {
-          if (!selIds.has(item.id)) return item;
-          const used = aiUsedQty[item.name] || 1;
-          const remaining = item.qty - used;
-          if (remaining <= 0) return null;
-          return {...item, qty: remaining};
-        }).filter(Boolean);
-      });
+      const recipes = Array.isArray(parsed) ? parsed : [parsed];
+      setRecipe(recipes[0]); setRecipeTab("作り方"); setShopChk(new Set());
+      // Save pending state - don't modify fridge yet, wait for user confirmation
+      setPendingRecipe({ recipes, chosenIds: new Set(selIds), fridgeSnapshot: [...fridge] });
+      addToHistory(recipes);
       setSelIds(new Set()); setSelQty({});
     } catch(e) { setRecipeErr("エラー: "+e.message); }
     finally { setGenerating(false); }
@@ -381,6 +492,7 @@ usedQtyには使用する食材名と個数を必ず含めること。`;
         <div style={{display:"flex",alignItems:"baseline",gap:6}}>
           <span style={{fontSize:22,fontWeight:800,letterSpacing:-1,color:A}}>ひとり</span>
           <span style={{fontSize:22,fontWeight:800,letterSpacing:-1}}>めし</span>
+          {syncing && <span style={{fontSize:10,color:MU,marginLeft:4}}>同期中…</span>}
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
 
@@ -512,13 +624,27 @@ usedQtyには使用する食材名と個数を必ず含めること。`;
               {sorted.map(it=>{
                 const d=daysTo(it.expiry),c=ec(d);
                 return (
-                  <div key={it.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:SF,borderRadius:12,marginBottom:8,border:"1px solid #2A2927"}}>
-                    <div style={{flex:1}}>
-                      <p style={{fontSize:15,fontFamily:"'Noto Sans JP',sans-serif",fontWeight:500}}>{it.name}{it.qty>1&&<span style={{fontSize:12,color:MU,marginLeft:6}}>×{it.qty}</span>}</p>
-                      <p style={{fontSize:11,color:MU,marginTop:2}}>購入: {it.purchaseDate}</p>
+                  <div key={it.id} style={{background:SF,borderRadius:12,marginBottom:8,border:"1px solid #2A2927",overflow:"hidden"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px"}}>
+                      <div style={{flex:1}}>
+                        <p style={{fontSize:15,fontFamily:"'Noto Sans JP',sans-serif",fontWeight:500}}>{it.name}{it.qty>1&&<span style={{fontSize:12,color:MU,marginLeft:6}}>×{it.qty}</span>}</p>
+                        <p style={{fontSize:11,color:MU,marginTop:2}}>購入: {it.purchaseDate}</p>
+                      </div>
+                      <span onClick={()=>setEditingExpiry(editingExpiry?.id===it.id?null:{id:it.id,expiry:it.expiry})}
+                        style={{fontSize:12,fontWeight:700,color:c,background:c+"22",padding:"3px 10px",borderRadius:20,cursor:"pointer",userSelect:"none"}}>
+                        {el(d)} ✎
+                      </span>
+                      <button onClick={()=>setFridge(fridge.filter(i=>i.id!==it.id))} style={{background:"none",border:"none",color:MU,fontSize:18,padding:"0 2px",lineHeight:1,cursor:"pointer"}}>×</button>
                     </div>
-                    <span style={{fontSize:12,fontWeight:700,color:c,background:c+"22",padding:"3px 10px",borderRadius:20}}>{el(d)}</span>
-                    <button onClick={()=>setFridge(fridge.filter(i=>i.id!==it.id))} style={{background:"none",border:"none",color:MU,fontSize:18,padding:"0 2px",lineHeight:1,cursor:"pointer"}}>×</button>
+                    {editingExpiry?.id===it.id && (
+                      <div style={{padding:"0 14px 12px",borderTop:"1px solid #2A2927",display:"flex",alignItems:"center",gap:8}}>
+                        <span style={{fontSize:12,color:MU,whiteSpace:"nowrap",fontFamily:"'Noto Sans JP',sans-serif"}}>賞味期限:</span>
+                        <input type="date" value={editingExpiry.expiry} onChange={e=>setEditingExpiry(prev=>({...prev,expiry:e.target.value}))}
+                          style={{flex:1,background:CD,border:"1px solid #3A3835",borderRadius:8,padding:"7px 10px",color:TX,fontSize:13,outline:"none"}}/>
+                        <button onClick={()=>{setFridge(f=>f.map(i=>i.id===it.id?{...i,expiry:editingExpiry.expiry}:i));setEditingExpiry(null);}}
+                          style={{background:A,border:"none",borderRadius:8,padding:"7px 14px",color:"#fff",fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",whiteSpace:"nowrap"}}>保存</button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -530,11 +656,23 @@ usedQtyには使用する食材名と個数を必ず含めること。`;
       {/* RECIPE */}
       {tab==="recipe" && (
         <div style={{padding:"18px 20px 0",animation:"fadeUp .3s ease"}}>
-          {/* Settings badges */}
-          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}} onClick={()=>setShowSettings(true)}>
-            {[`⏱ ${settings.maxTime}分`,`🍚 ${settings.riceSize}`,`🍽 ${settings.dishCount}`,`🧂 ${settings.spiceLevel}`,...(settings.cookStyle!=="何でも"?[`🔥 ${settings.cookStyle}`]:[])].map((b,i)=>(
-              <span key={i} style={{fontSize:11,color:BL,background:BL+"18",border:"1px solid "+BL+"33",padding:"4px 10px",borderRadius:20,cursor:"pointer"}}>{b}</span>
-            ))}
+          {/* Settings badges + recipe count + history */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}} onClick={()=>setShowSettings(true)}>
+              {[`⏱ ${settings.maxTime}分`,`🍚 ${settings.riceSize}`,`🍽 ${settings.dishCount}`,`🧂 ${settings.spiceLevel}`,...(settings.cookStyle!=="何でも"?[`🔥 ${settings.cookStyle}`]:[])].map((b,i)=>(
+                <span key={i} style={{fontSize:11,color:BL,background:BL+"18",border:"1px solid "+BL+"33",padding:"4px 10px",borderRadius:20,cursor:"pointer"}}>{b}</span>
+              ))}
+            </div>
+            <button onClick={()=>setShowHistory(true)} style={{background:"transparent",border:"1px solid #3A3835",borderRadius:8,padding:"5px 10px",color:MU,fontSize:11,fontFamily:"'Syne',sans-serif",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>📋 履歴</button>
+          </div>
+          {/* Recipe count selector */}
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,background:SF,borderRadius:10,padding:"10px 14px"}}>
+            <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif"}}>レシピ提案数</span>
+            <div style={{display:"flex",gap:4,marginLeft:"auto"}}>
+              {[1,2,3].map(n=>(
+                <button key={n} onClick={()=>setRecipeCount(n)} style={{width:32,height:32,borderRadius:8,border:"none",background:recipeCount===n?A:CD,color:recipeCount===n?"#fff":MU,fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .15s"}}>{n}</button>
+              ))}
+            </div>
           </div>
 
           {fridge.length===0 ? (
@@ -630,6 +768,77 @@ usedQtyには使用する食材名と個数を必ず含めること。`;
               </div>
             </div>
           )}
+        {/* Cook confirm buttons */}
+        {pendingRecipe && recipe && (
+          <div style={{padding:"0 20px",marginTop:8}}>
+            {pendingRecipe.recipes.length > 1 && (
+              <div style={{background:SF,borderRadius:12,padding:"12px 14px",border:"1px solid #2A2927",marginBottom:8}}>
+                <p style={{fontSize:11,color:MU,marginBottom:10,fontFamily:"'Noto Sans JP',sans-serif"}}>他のレシピ候補</p>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                  {pendingRecipe.recipes.map((r,i)=>(
+                    <button key={i} onClick={()=>{setRecipe(r);setRecipeTab("作り方");setShopChk(new Set());}}
+                      style={{padding:"6px 14px",background:recipe===r?A:CD,border:"1px solid "+(recipe===r?A:"#3A3835"),borderRadius:20,color:recipe===r?"#fff":TX,fontSize:12,cursor:"pointer",fontFamily:"'Noto Sans JP',sans-serif"}}>
+                      {r.emoji} {r.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div style={{display:"flex",gap:8,paddingBottom:20}}>
+              <button onClick={()=>{
+                const aiUsedQty = recipe.usedQty || {};
+                setFridge(prev=>prev.map(item=>{
+                  if(!pendingRecipe.chosenIds.has(item.id))return item;
+                  const used=aiUsedQty[item.name]||1;
+                  const remaining=item.qty-used;
+                  if(remaining<=0)return null;
+                  return {...item,qty:remaining};
+                }).filter(Boolean));
+                setPendingRecipe(null);
+              }} style={{flex:1,padding:"13px",background:GN,border:"none",borderRadius:12,color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
+                ✅ 作った！
+              </button>
+              <button onClick={()=>{
+                setFridge(pendingRecipe.fridgeSnapshot);
+                setPendingRecipe(null);
+                setRecipe(null);
+              }} style={{flex:1,padding:"13px",background:CD,border:"1px solid #3A3835",borderRadius:12,color:MU,fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
+                ✕ やめた
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      )}
+
+      {/* History Modal */}
+      {showHistory && (
+        <div onClick={()=>setShowHistory(false)} style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+          <div onClick={e=>e.stopPropagation()} style={{background:BG,borderRadius:"20px 20px 0 0",padding:"24px 20px 40px",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .25s ease",maxHeight:"80vh",overflowY:"auto"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+              <span style={{fontSize:15,fontWeight:700}}>📋 レシピ履歴</span>
+              <button onClick={()=>setShowHistory(false)} style={{background:"none",border:"none",color:MU,fontSize:22,cursor:"pointer"}}>×</button>
+            </div>
+            {recipeHistory.length===0?(
+              <div style={{textAlign:"center",padding:"30px 0",opacity:.4}}>
+                <p style={{fontSize:32,marginBottom:8}}>🍽</p>
+                <p style={{color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif"}}>まだレシピ履歴がありません</p>
+              </div>
+            ):recipeHistory.map((entry,ei)=>(
+              <div key={entry.id} style={{marginBottom:16}}>
+                <p style={{fontSize:11,color:MU,marginBottom:8,letterSpacing:1}}>{entry.date}</p>
+                {entry.recipes.map((r,ri)=>(
+                  <div key={ri} style={{background:SF,borderRadius:12,padding:"12px 14px",marginBottom:6,border:"1px solid #2A2927",display:"flex",alignItems:"center",gap:12}}>
+                    <span style={{fontSize:24}}>{r.emoji}</span>
+                    <div style={{flex:1}}>
+                      <p style={{fontSize:14,fontWeight:700}}>{r.name}</p>
+                      <p style={{fontSize:11,color:MU,marginTop:2,fontFamily:"'Noto Sans JP',sans-serif"}}>{r.time} / {r.difficulty} / {r.calories}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -680,5 +889,5 @@ export default function App() {
   const [user, setUser] = useState(undefined);
   useEffect(() => { return onAuthStateChanged(auth, u => setUser(u)); }, []);
   if (user === undefined) return <div style={{minHeight:"100vh",background:"#0F0E0C",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{width:32,height:32,border:"3px solid #333",borderTopColor:"#FF6B35",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/><style>{"@keyframes spin{to{transform:rotate(360deg)}}"}</style></div>;
-  return user ? <MainApp/> : <LoginScreen/>;
+  return user ? <MainApp user={user}/> : <LoginScreen/>;
 }
