@@ -101,25 +101,9 @@ function xj(t) {
 function sv(k,v) { try { localStorage.setItem(k,JSON.stringify(v)); } catch(e) {} }
 function ld(k,d) { try { const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch(e) { return d; } }
 
-// Cloud sync helpers
-async function cloudGet(uid, key, def) {
-  try {
-    const res = await fetch(`/api/data?action=get&key=${key}`, {
-      headers: { Authorization: `Bearer ${uid}` }
-    });
-    const data = await res.json();
-    return data.value ? JSON.parse(data.value) : def;
-  } catch(e) { return def; }
-}
-async function cloudSet(uid, key, value) {
-  try {
-    await fetch('/api/data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${uid}` },
-      body: JSON.stringify({ action: 'set', key, value: JSON.stringify(value) })
-    });
-  } catch(e) {}
-}
+// Cloud sync helpers (dev: no-op)
+async function cloudGet(uid, key, def) { return def; }
+async function cloudSet(uid, key, value) {}
 
 // ---- Segment Control ----
 function Seg({label, options, value, onChange}) {
