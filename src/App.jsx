@@ -49,6 +49,77 @@ function Seg({label,options,value,onChange}){
   );
 }
 
+const TERMS_TEXT=`利用規約
+
+第1条（サービスについて）
+「ひとりめし」はAIによる冷蔵庫管理・レシピ提案β版サービスです。機能・仕様は予告なく変更される場合があります。
+
+第2条（免責事項）
+
+■ 賞味期限・消費期限について
+表示される賞味期限はAIによる推定値です。必ず商品パッケージの記載をご確認ください。本サービスの情報を参考にした食中毒・健康被害について、当方は責任を負いません。
+
+■ レシピについて
+AIが生成するレシピの味・栄養・安全性を保証しません。アレルギー等がある方は食材を必ずご自身で確認してください。
+
+■ 節約額について
+表示される節約額は目安であり、実際の節約を保証するものではありません。
+
+第3条（禁止事項）
+不正アクセス・過度なAPIリクエスト・リバースエンジニアリング等を禁止します。
+
+第4条（サービスの変更・終了）
+β版期間中は予告なくサービスの変更・終了を行う場合があります。`;
+
+const PRIVACY_TEXT=`プライバシーポリシー
+
+■ 収集する情報
+・メールアドレス（認証のため）
+・冷蔵庫データ（食材名・数量・賞味期限）
+・レシピ履歴・設定情報
+
+■ 利用目的
+サービスの提供・維持・改善のために使用します。
+
+■ 利用する外部サービス
+・Firebase（Google）：認証管理
+・Upstash：データ保存
+・Anthropic Claude API：レシピ生成・レシート読み取り
+※入力した画像・テキストはAI処理に使用されます。
+
+■ 第三者提供
+法令に基づく場合を除き、個人情報を第三者に提供しません。
+
+■ データ削除
+アカウント削除をご希望の場合はβ版相談窓口までご連絡ください。`;
+
+function TermsModal({onClose,onAgree}){
+  const[tab,setTab]=useState("terms");
+  const terms=tab==="terms"?TERMS_TEXT:PRIVACY_TEXT;
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+      <div style={{background:"#0F0E0C",borderRadius:"20px 20px 0 0",padding:"24px 20px 0",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .25s ease",height:"85vh",display:"flex",flexDirection:"column"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <span style={{fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",color:"#F5F0E8"}}>利用規約・プライバシーポリシー</span>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#6B6760",fontSize:22,cursor:"pointer"}}>×</button>
+        </div>
+        <div style={{display:"flex",gap:4,marginBottom:16,background:"#232220",borderRadius:10,padding:4}}>
+          {[{key:"terms",label:"利用規約"},{key:"privacy",label:"プライバシー"}].map(t=>(
+            <button key={t.key} onClick={()=>setTab(t.key)} style={{flex:1,padding:"8px",background:tab===t.key?"#1A1916":"transparent",border:"none",borderRadius:7,color:tab===t.key?"#F5F0E8":"#6B6760",fontSize:13,fontWeight:tab===t.key?700:400,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>{t.label}</button>
+          ))}
+        </div>
+        <div style={{flex:1,overflowY:"auto",marginBottom:16}}>
+          <pre style={{fontSize:13,color:"#B0ABA3",fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.8,whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{terms}</pre>
+        </div>
+        <div style={{padding:"0 0 40px"}}>
+          <button onClick={()=>{onAgree();onClose();}} style={{width:"100%",padding:"14px",background:"#FF6B35",border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>同意してアカウントを作成</button>
+          <button onClick={onClose} style={{width:"100%",padding:"11px",background:"transparent",border:"none",color:"#6B6760",fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:8}}>戻る</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SignupModal({onClose}){
   const[email,setEmail]=useState("");
   const[pass,setPass]=useState("");
@@ -153,73 +224,180 @@ function LoginScreen(){
   );
 }
 
-const TERMS_TEXT=`利用規約
-
-第1条（サービスについて）
-「ひとりめし」はAIによる冷蔵庫管理・レシピ提案β版サービスです。機能・仕様は予告なく変更される場合があります。
-
-第2条（免責事項）
-
-■ 賞味期限・消費期限について
-表示される賞味期限はAIによる推定値です。必ず商品パッケージの記載をご確認ください。本サービスの情報を参考にした食中毒・健康被害について、当方は責任を負いません。
-
-■ レシピについて
-AIが生成するレシピの味・栄養・安全性を保証しません。アレルギー等がある方は食材を必ずご自身で確認してください。
-
-■ 節約額について
-表示される節約額は目安であり、実際の節約を保証するものではありません。
-
-第3条（禁止事項）
-不正アクセス・過度なAPIリクエスト・リバースエンジニアリング等を禁止します。
-
-第4条（サービスの変更・終了）
-β版期間中は予告なくサービスの変更・終了を行う場合があります。`;
-
-const PRIVACY_TEXT=`プライバシーポリシー
-
-■ 収集する情報
-・メールアドレス（認証のため）
-・冷蔵庫データ（食材名・数量・賞味期限）
-・レシピ履歴・設定情報
-
-■ 利用目的
-サービスの提供・維持・改善のために使用します。
-
-■ 利用する外部サービス
-・Firebase（Google）：認証管理
-・Upstash：データ保存
-・Anthropic Claude API：レシピ生成・レシート読み取り
-※入力した画像・テキストはAI処理に使用されます。
-
-■ 第三者提供
-法令に基づく場合を除き、個人情報を第三者に提供しません。
-
-■ データ削除
-アカウント削除をご希望の場合はβ版相談窓口までご連絡ください。`;
-
-function TermsModal({onClose,onAgree}){
-  const[tab,setTab]=useState("terms");
-  const terms=tab==="terms"?TERMS_TEXT:PRIVACY_TEXT;
+function LoginScreen(){
+  const[email,setEmail]=useState("");
+  const[pass,setPass]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[err,setErr]=useState("");
+  const[showSignup,setShowSignup]=useState(false);
+  const doLogin=async()=>{if(!email||!pass){setErr("メールアドレスとパスワードを入力してください");return;}setLoading(true);setErr("");try{await signInWithEmailAndPassword(auth,email,pass);}catch(e){const m={"auth/invalid-credential":"メールアドレスまたはパスワードが間違っています","auth/invalid-email":"メールアドレスの形式が正しくありません","auth/too-many-requests":"しばらく待ってから試してください"};setErr(m[e.code]||"ログインに失敗しました");}finally{setLoading(false);};};
   return(
-    <div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
-      <div style={{background:"#0F0E0C",borderRadius:"20px 20px 0 0",padding:"24px 20px 0",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .25s ease",height:"85vh",display:"flex",flexDirection:"column"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-          <span style={{fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",color:"#F5F0E8"}}>利用規約・プライバシーポリシー</span>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"#6B6760",fontSize:22,cursor:"pointer"}}>×</button>
+    <div style={{minHeight:"100vh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 24px"}}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;}::placeholder{color:#3A3835;}@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <div style={{width:"100%",maxWidth:360,animation:"fadeUp .5s ease",fontFamily:"'Syne',sans-serif",color:TX}}>
+        <div style={{textAlign:"center",marginBottom:48}}>
+          <div style={{fontSize:44,marginBottom:12}}>🍳</div>
+          <h1 style={{fontSize:34,fontWeight:800,letterSpacing:-1.5}}><span style={{color:A}}>ひとり</span>めし</h1>
+          <p style={{fontSize:11,color:MU,marginTop:8,letterSpacing:2,textTransform:"uppercase"}}>今夜の献立、5秒で決まる</p>
         </div>
-        <div style={{display:"flex",gap:4,marginBottom:16,background:"#232220",borderRadius:10,padding:4}}>
-          {[{key:"terms",label:"利用規約"},{key:"privacy",label:"プライバシー"}].map(t=>(
-            <button key={t.key} onClick={()=>setTab(t.key)} style={{flex:1,padding:"8px",background:tab===t.key?"#1A1916":"transparent",border:"none",borderRadius:7,color:tab===t.key?"#F5F0E8":"#6B6760",fontSize:13,fontWeight:tab===t.key?700:400,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>{t.label}</button>
-          ))}
+        <div style={{marginBottom:14}}>
+          <label style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>メールアドレス</label>
+          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&document.getElementById("lp")?.focus()} placeholder="example@mail.com" autoComplete="email" style={{width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
         </div>
-        <div style={{flex:1,overflowY:"auto",marginBottom:16}}>
-          <pre style={{fontSize:13,color:"#B0ABA3",fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.8,whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{terms}</pre>
+        <div style={{marginBottom:14}}>
+          <label style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>パスワード</label>
+          <input id="lp" type="password" value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="••••••••" autoComplete="current-password" style={{width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
         </div>
-        <div style={{padding:"0 0 40px"}}>
-          <button onClick={()=>{onAgree();onClose();}} style={{width:"100%",padding:"14px",background:"#FF6B35",border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>同意してアカウントを作成</button>
-          <button onClick={onClose} style={{width:"100%",padding:"11px",background:"transparent",border:"none",color:"#6B6760",fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:8}}>戻る</button>
+        <button onClick={doLogin} disabled={loading} style={{width:"100%",padding:16,background:loading?"#2A2927":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:24}}>
+          {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>ログイン中…</>:"ログイン"}
+        </button>
+        {err&&<div role="alert" style={{background:"rgba(255,85,85,.1)",border:"1px solid rgba(255,85,85,.3)",borderRadius:10,padding:"12px 14px",fontSize:13,color:RD,fontFamily:"'Noto Sans JP',sans-serif",marginTop:14,lineHeight:1.5}}>{err}</div>}
+        <div style={{textAlign:"center",marginTop:24}}>
+          <button onClick={()=>setShowSignup(true)} style={{background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",textDecoration:"underline"}}>アカウントをお持ちでない方はこちら</button>
         </div>
       </div>
+      {showSignup&&<SignupModal onClose={()=>setShowSignup(false)}/>}
+    </div>
+  );
+}
+
+function SignupModal({onClose}){
+  const[email,setEmail]=useState("");
+  const[pass,setPass]=useState("");
+  const[passConfirm,setPassConfirm]=useState("");
+  const[errors,setErrors]=useState({});
+  const[loading,setLoading]=useState(false);
+  const[success,setSuccess]=useState(false);
+  const[agreed,setAgreed]=useState(false);
+  const[showTerms,setShowTerms]=useState(false);
+  const[termsTab,setTermsTab]=useState("terms");
+  const validate=()=>{const e={};if(!email)e.email="メールアドレスを入力してください";else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))e.email="正しいメールアドレスの形式で入力してください";if(!pass)e.pass="パスワードを入力してください";else if(pass.length<6)e.pass="6文字以上にしてください";else if(!/[A-Z]/.test(pass))e.pass="大文字を1文字以上含めてください";else if(!/[0-9]/.test(pass))e.pass="数字を1文字以上含めてください";if(!passConfirm)e.passConfirm="確認用パスワードを入力してください";else if(pass!==passConfirm)e.passConfirm="パスワードが一致しません";if(!agreed)e.agreed="利用規約・プライバシーポリシーへの同意が必要です";return e;};
+  const doSignup=async()=>{const e=validate();setErrors(e);if(Object.keys(e).length>0)return;setLoading(true);try{await createUserWithEmailAndPassword(auth,email,pass);setSuccess(true);}catch(err){const m={"auth/email-already-in-use":"このメールアドレスはすでに登録されています","auth/invalid-email":"正しいメールアドレスの形式で入力してください","auth/weak-password":"パスワードが弱すぎます"};setErrors({general:m[err.code]||"登録に失敗しました"});}finally{setLoading(false);};};
+  const inp=(hasErr)=>({width:"100%",background:SF,border:"1px solid "+(hasErr?"#FF5555":"#2E2D2B"),borderRadius:12,padding:"14px 16px",color:TX,fontSize:15,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif",marginTop:6});
+  const errS={fontSize:12,color:RD,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif"};
+  return(
+    <div role="dialog" aria-modal="true" onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+      <div style={{background:BG,borderRadius:"20px 20px 0 0",padding:"28px 24px 48px",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .3s ease",maxHeight:"90vh",overflowY:"auto"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
+          <h2 style={{fontSize:18,fontWeight:800}}>新規ユーザー登録</h2>
+          <button onClick={onClose} style={{background:"none",border:"none",color:MU,fontSize:24,cursor:"pointer"}}>×</button>
+        </div>
+        {success?(
+          <div style={{textAlign:"center",padding:"20px 0"}}>
+            <div style={{fontSize:48,marginBottom:16}}>🎉</div>
+            <p style={{fontSize:16,fontWeight:700,marginBottom:8}}>登録完了！</p>
+            <p style={{fontSize:14,color:MU,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.7,marginBottom:24}}>アカウントが作成されました。<br/>まずレシートをスキャンして食材を登録してみましょう！</p>
+            <button onClick={onClose} style={{background:A,border:"none",borderRadius:12,padding:"13px 32px",color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>はじめる</button>
+          </div>
+        ):(
+          <>
+            <div style={{marginBottom:16}}>
+              <label style={{fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase"}}>メールアドレス <span style={{color:RD}}>*</span></label>
+              <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setErrors(p=>({...p,email:""}));}} placeholder="example@mail.com" style={inp(!!errors.email)}/>
+              {errors.email&&<p style={errS}>⚠ {errors.email}</p>}
+            </div>
+            <div style={{marginBottom:16}}>
+              <label style={{fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase"}}>パスワード <span style={{color:RD}}>*</span></label>
+              <input type="password" value={pass} onChange={e=>{setPass(e.target.value);setErrors(p=>({...p,pass:""}));}} placeholder="例: Hello123" style={inp(!!errors.pass)}/>
+              <p style={{fontSize:11,color:MU,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif"}}>6文字以上・大文字1文字以上・数字1文字以上</p>
+              {errors.pass&&<p style={errS}>⚠ {errors.pass}</p>}
+            </div>
+            <div style={{marginBottom:24}}>
+              <label style={{fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase"}}>パスワード（確認） <span style={{color:RD}}>*</span></label>
+              <input type="password" value={passConfirm} onChange={e=>{setPassConfirm(e.target.value);setErrors(p=>({...p,passConfirm:""}));}} onKeyDown={e=>e.key==="Enter"&&doSignup()} placeholder="もう一度入力" style={inp(!!errors.passConfirm)}/>
+              {errors.passConfirm&&<p style={errS}>⚠ {errors.passConfirm}</p>}
+            </div>
+            {/* 利用規約同意 */}
+            <div onClick={()=>setAgreed(a=>!a)} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"14px",background:agreed?GN+"11":CD,border:"1px solid "+(agreed?GN+"44":errors.agreed?"#FF5555":"#3A3835"),borderRadius:12,cursor:"pointer",marginBottom:errors.agreed?4:16,transition:"all .2s"}}>
+              <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(agreed?GN:"#3A3835"),background:agreed?GN:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:12,color:"#fff",transition:"all .15s",marginTop:1}}>{agreed?"✓":""}</div>
+              <p style={{fontSize:13,color:TX,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.6}}>
+                <span onClick={e=>{e.stopPropagation();setShowTerms(true);}} style={{color:BL,textDecoration:"underline",cursor:"pointer"}}>利用規約・プライバシーポリシー</span>
+                を読み、同意します
+              </p>
+            </div>
+            {errors.agreed&&<p style={{fontSize:12,color:RD,marginBottom:16,fontFamily:"'Noto Sans JP',sans-serif"}}>⚠ {errors.agreed}</p>}
+            {errors.general&&<div role="alert" style={{background:"rgba(255,85,85,.1)",border:"1px solid rgba(255,85,85,.3)",borderRadius:10,padding:"12px 14px",fontSize:13,color:RD,fontFamily:"'Noto Sans JP',sans-serif",marginBottom:16}}>⚠ {errors.general}</div>}
+            <button onClick={doSignup} disabled={loading} style={{width:"100%",padding:16,background:loading?"#2A2927":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+              {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>登録中…</>:"アカウントを作成"}
+            </button>
+            <button onClick={onClose} style={{width:"100%",padding:13,background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:12}}>キャンセル</button>
+          </>
+        )}
+      {showTerms&&<TermsModal onClose={()=>setShowTerms(false)} onAgree={()=>{setAgreed(true);setShowTerms(false);}}/>}
+    </div>
+  );
+}
+
+function LoginScreen(){
+  const[email,setEmail]=useState("");
+  const[pass,setPass]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[err,setErr]=useState("");
+  const[showSignup,setShowSignup]=useState(false);
+  const doLogin=async()=>{if(!email||!pass){setErr("メールアドレスとパスワードを入力してください");return;}setLoading(true);setErr("");try{await signInWithEmailAndPassword(auth,email,pass);}catch(e){const m={"auth/invalid-credential":"メールアドレスまたはパスワードが間違っています","auth/invalid-email":"メールアドレスの形式が正しくありません","auth/too-many-requests":"しばらく待ってから試してください"};setErr(m[e.code]||"ログインに失敗しました");}finally{setLoading(false);};};
+  return(
+    <div style={{minHeight:"100vh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 24px"}}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;}::placeholder{color:#3A3835;}@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <div style={{width:"100%",maxWidth:360,animation:"fadeUp .5s ease",fontFamily:"'Syne',sans-serif",color:TX}}>
+        <div style={{textAlign:"center",marginBottom:48}}>
+          <div style={{fontSize:44,marginBottom:12}}>🍳</div>
+          <h1 style={{fontSize:34,fontWeight:800,letterSpacing:-1.5}}><span style={{color:A}}>ひとり</span>めし</h1>
+          <p style={{fontSize:11,color:MU,marginTop:8,letterSpacing:2,textTransform:"uppercase"}}>今夜の献立、5秒で決まる</p>
+        </div>
+        <div style={{marginBottom:14}}>
+          <label style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>メールアドレス</label>
+          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&document.getElementById("lp")?.focus()} placeholder="example@mail.com" autoComplete="email" style={{width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
+        </div>
+        <div style={{marginBottom:14}}>
+          <label style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>パスワード</label>
+          <input id="lp" type="password" value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="••••••••" autoComplete="current-password" style={{width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
+        </div>
+        <button onClick={doLogin} disabled={loading} style={{width:"100%",padding:16,background:loading?"#2A2927":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:24}}>
+          {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>ログイン中…</>:"ログイン"}
+        </button>
+        {err&&<div role="alert" style={{background:"rgba(255,85,85,.1)",border:"1px solid rgba(255,85,85,.3)",borderRadius:10,padding:"12px 14px",fontSize:13,color:RD,fontFamily:"'Noto Sans JP',sans-serif",marginTop:14,lineHeight:1.5}}>{err}</div>}
+        <div style={{textAlign:"center",marginTop:24}}>
+          <button onClick={()=>setShowSignup(true)} style={{background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",textDecoration:"underline"}}>アカウントをお持ちでない方はこちら</button>
+        </div>
+      </div>
+      {showSignup&&<SignupModal onClose={()=>setShowSignup(false)}/>}
+    </div>
+  );
+}
+
+function LoginScreen(){
+  const[email,setEmail]=useState("");
+  const[pass,setPass]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[err,setErr]=useState("");
+  const[showSignup,setShowSignup]=useState(false);
+  const doLogin=async()=>{if(!email||!pass){setErr("メールアドレスとパスワードを入力してください");return;}setLoading(true);setErr("");try{await signInWithEmailAndPassword(auth,email,pass);}catch(e){const m={"auth/invalid-credential":"メールアドレスまたはパスワードが間違っています","auth/invalid-email":"メールアドレスの形式が正しくありません","auth/too-many-requests":"しばらく待ってから試してください"};setErr(m[e.code]||"ログインに失敗しました");}finally{setLoading(false);};};
+  return(
+    <div style={{minHeight:"100vh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 24px"}}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;}::placeholder{color:#3A3835;}@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <div style={{width:"100%",maxWidth:360,animation:"fadeUp .5s ease",fontFamily:"'Syne',sans-serif",color:TX}}>
+        <div style={{textAlign:"center",marginBottom:48}}>
+          <div style={{fontSize:44,marginBottom:12}}>🍳</div>
+          <h1 style={{fontSize:34,fontWeight:800,letterSpacing:-1.5}}><span style={{color:A}}>ひとり</span>めし</h1>
+          <p style={{fontSize:11,color:MU,marginTop:8,letterSpacing:2,textTransform:"uppercase"}}>今夜の献立、5秒で決まる</p>
+        </div>
+        <div style={{marginBottom:14}}>
+          <label style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>メールアドレス</label>
+          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&document.getElementById("lp")?.focus()} placeholder="example@mail.com" autoComplete="email" style={{width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
+        </div>
+        <div style={{marginBottom:14}}>
+          <label style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>パスワード</label>
+          <input id="lp" type="password" value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="••••••••" autoComplete="current-password" style={{width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
+        </div>
+        <button onClick={doLogin} disabled={loading} style={{width:"100%",padding:16,background:loading?"#2A2927":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:24}}>
+          {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>ログイン中…</>:"ログイン"}
+        </button>
+        {err&&<div role="alert" style={{background:"rgba(255,85,85,.1)",border:"1px solid rgba(255,85,85,.3)",borderRadius:10,padding:"12px 14px",fontSize:13,color:RD,fontFamily:"'Noto Sans JP',sans-serif",marginTop:14,lineHeight:1.5}}>{err}</div>}
+        <div style={{textAlign:"center",marginTop:24}}>
+          <button onClick={()=>setShowSignup(true)} style={{background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",textDecoration:"underline"}}>アカウントをお持ちでない方はこちら</button>
+        </div>
+      </div>
+      {showSignup&&<SignupModal onClose={()=>setShowSignup(false)}/>}
     </div>
   );
 }
