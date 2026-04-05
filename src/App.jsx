@@ -182,6 +182,7 @@ function SignupModal({onClose}){
             <button onClick={onClose} style={{width:"100%",padding:13,background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:12}}>キャンセル</button>
           </>
         )}
+      </div>
       {showTerms&&<TermsModal onClose={()=>setShowTerms(false)} onAgree={()=>{setAgreed(true);setShowTerms(false);}}/>}
     </div>
   );
@@ -323,6 +324,7 @@ function SignupModal({onClose}){
             <button onClick={onClose} style={{width:"100%",padding:13,background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:12}}>キャンセル</button>
           </>
         )}
+      </div>
       {showTerms&&<TermsModal onClose={()=>setShowTerms(false)} onAgree={()=>{setAgreed(true);setShowTerms(false);}}/>}
     </div>
   );
