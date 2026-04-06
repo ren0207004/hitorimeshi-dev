@@ -13,7 +13,7 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const auth = getAuth(fbApp);
 
-const A="#FF6B35",BG="#0F0E0C",SF="#1A1916",CD="#232220",TX="#F5F0E8",MU="#6B6760",GN="#4CAF7D",YW="#FFB830",RD="#FF5555",BL="#4A9EFF";
+const A="#E8704A",BG="#FFFCF9",SF="#FFF8F0",CD="#FFF0E5",TX="#3D2408",MU="#C4956A",GN="#5A9E5A",YW="#D48B2A",RD="#D94040",BL="#4A7EC4";
 const IS_BETA=true;
 const BETA_VERSION="0.3.0";
 const CHANGELOG=[
@@ -97,23 +97,23 @@ function TermsModal({onClose,onAgree}){
   const[tab,setTab]=useState("terms");
   const terms=tab==="terms"?TERMS_TEXT:PRIVACY_TEXT;
   return(
-    <div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
-      <div style={{background:"#0F0E0C",borderRadius:"20px 20px 0 0",padding:"24px 20px 0",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .25s ease",height:"85vh",display:"flex",flexDirection:"column"}}>
+    <div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(61,36,8,.65)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+      <div style={{background:"#FFFCF9",borderRadius:"20px 20px 0 0",padding:"24px 20px 0",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .25s ease",height:"85vh",display:"flex",flexDirection:"column"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-          <span style={{fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",color:"#F5F0E8"}}>利用規約・プライバシーポリシー</span>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"#6B6760",fontSize:22,cursor:"pointer"}}>×</button>
+          <span style={{fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",color:"#3D2408"}}>利用規約・プライバシーポリシー</span>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#C4956A",fontSize:22,cursor:"pointer"}}>×</button>
         </div>
-        <div style={{display:"flex",gap:4,marginBottom:16,background:"#232220",borderRadius:10,padding:4}}>
+        <div style={{display:"flex",gap:4,marginBottom:16,background:"#FFF0E5",borderRadius:10,padding:4}}>
           {[{key:"terms",label:"利用規約"},{key:"privacy",label:"プライバシー"}].map(t=>(
-            <button key={t.key} onClick={()=>setTab(t.key)} style={{flex:1,padding:"8px",background:tab===t.key?"#1A1916":"transparent",border:"none",borderRadius:7,color:tab===t.key?"#F5F0E8":"#6B6760",fontSize:13,fontWeight:tab===t.key?700:400,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>{t.label}</button>
+            <button key={t.key} onClick={()=>setTab(t.key)} style={{flex:1,padding:"8px",background:tab===t.key?"#FFF8F0":"transparent",border:"none",borderRadius:7,color:tab===t.key?"#3D2408":"#C4956A",fontSize:13,fontWeight:tab===t.key?700:400,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>{t.label}</button>
           ))}
         </div>
         <div style={{flex:1,overflowY:"auto",marginBottom:16}}>
-          <pre style={{fontSize:13,color:"#B0ABA3",fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.8,whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{terms}</pre>
+          <pre style={{fontSize:13,color:"#8A6A4A",fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.8,whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{terms}</pre>
         </div>
         <div style={{padding:"0 0 40px"}}>
           <button onClick={()=>{onAgree();onClose();}} style={{width:"100%",padding:"14px",background:"#FF6B35",border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>同意してアカウントを作成</button>
-          <button onClick={onClose} style={{width:"100%",padding:"11px",background:"transparent",border:"none",color:"#6B6760",fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:8}}>戻る</button>
+          <button onClick={onClose} style={{width:"100%",padding:"11px",background:"transparent",border:"none",color:"#C4956A",fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:8}}>戻る</button>
         </div>
       </div>
     </div>
@@ -132,10 +132,10 @@ function SignupModal({onClose}){
   const[termsTab,setTermsTab]=useState("terms");
   const validate=()=>{const e={};if(!email)e.email="メールアドレスを入力してください";else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))e.email="正しいメールアドレスの形式で入力してください";if(!pass)e.pass="パスワードを入力してください";else if(pass.length<6)e.pass="6文字以上にしてください";else if(!/[A-Z]/.test(pass))e.pass="大文字を1文字以上含めてください";else if(!/[0-9]/.test(pass))e.pass="数字を1文字以上含めてください";if(!passConfirm)e.passConfirm="確認用パスワードを入力してください";else if(pass!==passConfirm)e.passConfirm="パスワードが一致しません";if(!agreed)e.agreed="利用規約・プライバシーポリシーへの同意が必要です";return e;};
   const doSignup=async()=>{const e=validate();setErrors(e);if(Object.keys(e).length>0)return;setLoading(true);try{await createUserWithEmailAndPassword(auth,email,pass);setSuccess(true);}catch(err){const m={"auth/email-already-in-use":"このメールアドレスはすでに登録されています","auth/invalid-email":"正しいメールアドレスの形式で入力してください","auth/weak-password":"パスワードが弱すぎます"};setErrors({general:m[err.code]||"登録に失敗しました"});}finally{setLoading(false);};};
-  const inp=(hasErr)=>({width:"100%",background:SF,border:"1px solid "+(hasErr?"#FF5555":"#2E2D2B"),borderRadius:12,padding:"14px 16px",color:TX,fontSize:15,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif",marginTop:6});
+  const inp=(hasErr)=>({width:"100%",background:SF,border:"1px solid "+(hasErr?"#FF5555":"#F0D8C0"),borderRadius:12,padding:"14px 16px",color:TX,fontSize:15,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif",marginTop:6});
   const errS={fontSize:12,color:RD,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif"};
   return(
-    <div role="dialog" aria-modal="true" onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+    <div role="dialog" aria-modal="true" onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:"fixed",inset:0,zIndex:300,background:"rgba(61,36,8,.55)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
       <div style={{background:BG,borderRadius:"20px 20px 0 0",padding:"28px 24px 48px",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .3s ease",maxHeight:"90vh",overflowY:"auto"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
           <h2 style={{fontSize:18,fontWeight:800}}>新規ユーザー登録</h2>
@@ -167,8 +167,8 @@ function SignupModal({onClose}){
               {errors.passConfirm&&<p style={errS}>⚠ {errors.passConfirm}</p>}
             </div>
             {/* 利用規約同意 */}
-            <div onClick={()=>setAgreed(a=>!a)} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"14px",background:agreed?GN+"11":CD,border:"1px solid "+(agreed?GN+"44":errors.agreed?"#FF5555":"#3A3835"),borderRadius:12,cursor:"pointer",marginBottom:errors.agreed?4:16,transition:"all .2s"}}>
-              <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(agreed?GN:"#3A3835"),background:agreed?GN:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:12,color:"#fff",transition:"all .15s",marginTop:1}}>{agreed?"✓":""}</div>
+            <div onClick={()=>setAgreed(a=>!a)} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"14px",background:agreed?GN+"11":CD,border:"1px solid "+(agreed?GN+"44":errors.agreed?"#FF5555":"#E8D0B8"),borderRadius:12,cursor:"pointer",marginBottom:errors.agreed?4:16,transition:"all .2s"}}>
+              <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(agreed?GN:"#E8D0B8"),background:agreed?GN:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:12,color:"#fff",transition:"all .15s",marginTop:1}}>{agreed?"✓":""}</div>
               <p style={{fontSize:13,color:TX,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.6}}>
                 <span onClick={e=>{e.stopPropagation();setShowTerms(true);}} style={{color:BL,textDecoration:"underline",cursor:"pointer"}}>利用規約・プライバシーポリシー</span>
                 を読み、同意します
@@ -176,8 +176,8 @@ function SignupModal({onClose}){
             </div>
             {errors.agreed&&<p style={{fontSize:12,color:RD,marginBottom:16,fontFamily:"'Noto Sans JP',sans-serif"}}>⚠ {errors.agreed}</p>}
             {errors.general&&<div role="alert" style={{background:"rgba(255,85,85,.1)",border:"1px solid rgba(255,85,85,.3)",borderRadius:10,padding:"12px 14px",fontSize:13,color:RD,fontFamily:"'Noto Sans JP',sans-serif",marginBottom:16}}>⚠ {errors.general}</div>}
-            <button onClick={doSignup} disabled={loading} style={{width:"100%",padding:16,background:loading?"#2A2927":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-              {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>登録中…</>:"アカウントを作成"}
+            <button onClick={doSignup} disabled={loading} style={{width:"100%",padding:16,background:loading?"#F0E0D0":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+              {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.5)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>登録中…</>:"アカウントを作成"}
             </button>
             <button onClick={onClose} style={{width:"100%",padding:13,background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:12}}>キャンセル</button>
           </>
@@ -205,7 +205,7 @@ function LoginScreen({onDemo}){
   const doLogin=async()=>{if(!email||!pass){setErr("メールアドレスとパスワードを入力してください");return;}setLoading(true);setErr("");try{await signInWithEmailAndPassword(auth,email,pass);}catch(e){const m={"auth/invalid-credential":"メールアドレスまたはパスワードが間違っています","auth/invalid-email":"メールアドレスの形式が正しくありません","auth/too-many-requests":"しばらく待ってから試してください"};setErr(m[e.code]||"ログインに失敗しました");}finally{setLoading(false);};};
   return(
     <div style={{minHeight:"100vh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 24px"}}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;}::placeholder{color:#3A3835;}@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;}::placeholder{color:#D4B090;}@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <div style={{width:"100%",maxWidth:360,animation:"fadeUp .5s ease",fontFamily:"'Syne',sans-serif",color:TX}}>
         <div style={{textAlign:"center",marginBottom:40}}>
           <div style={{fontSize:48,marginBottom:12}}>🍳</div>
@@ -223,9 +223,9 @@ function LoginScreen({onDemo}){
             </button>
 
             <div style={{display:"flex",alignItems:"center",gap:10,margin:"20px 0"}}>
-              <div style={{flex:1,height:1,background:"#2A2927"}}/>
+              <div style={{flex:1,height:1,background:"#F0E0D0"}}/>
               <span style={{fontSize:11,color:MU}}>アカウントをお持ちの方</span>
-              <div style={{flex:1,height:1,background:"#2A2927"}}/>
+              <div style={{flex:1,height:1,background:"#F0E0D0"}}/>
             </div>
 
             <button onClick={()=>setShowLogin(true)}
@@ -233,7 +233,7 @@ function LoginScreen({onDemo}){
               ログイン
             </button>
             <button onClick={()=>setShowSignup(true)}
-              style={{width:"100%",padding:14,background:SF,border:"1px solid #2E2D2B",borderRadius:12,color:TX,fontSize:14,fontWeight:600,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
+              style={{width:"100%",padding:14,background:SF,border:"1px solid #E8C8A0",borderRadius:12,color:TX,fontSize:14,fontWeight:600,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
               新規登録
             </button>
           </>
@@ -241,14 +241,14 @@ function LoginScreen({onDemo}){
           <>
             <div style={{marginBottom:14}}>
               <label style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>メールアドレス</label>
-              <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&document.getElementById("lp")?.focus()} placeholder="example@mail.com" autoComplete="email" style={{width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
+              <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&document.getElementById("lp")?.focus()} placeholder="example@mail.com" autoComplete="email" style={{width:"100%",background:SF,border:"1px solid #E8C8A0",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
             </div>
             <div style={{marginBottom:14}}>
               <label style={{display:"block",fontSize:11,color:MU,letterSpacing:1,textTransform:"uppercase",marginBottom:7}}>パスワード</label>
-              <input id="lp" type="password" value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="••••••••" autoComplete="current-password" style={{width:"100%",background:SF,border:"1px solid #2E2D2B",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
+              <input id="lp" type="password" value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doLogin()} placeholder="••••••••" autoComplete="current-password" style={{width:"100%",background:SF,border:"1px solid #E8C8A0",borderRadius:12,padding:"14px 16px",color:TX,fontSize:16,outline:"none",WebkitAppearance:"none",fontFamily:"'Noto Sans JP',sans-serif"}}/>
             </div>
-            <button onClick={doLogin} disabled={loading} style={{width:"100%",padding:16,background:loading?"#2A2927":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:8}}>
-              {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>ログイン中…</>:"ログイン"}
+            <button onClick={doLogin} disabled={loading} style={{width:"100%",padding:16,background:loading?"#F0E0D0":A,color:loading?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:8}}>
+              {loading?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.5)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .7s linear infinite"}}/>ログイン中…</>:"ログイン"}
             </button>
             {err&&<div role="alert" style={{background:"rgba(255,85,85,.1)",border:"1px solid rgba(255,85,85,.3)",borderRadius:10,padding:"12px 14px",fontSize:13,color:RD,fontFamily:"'Noto Sans JP',sans-serif",marginTop:14,lineHeight:1.5}}>{err}</div>}
             <button onClick={()=>setShowLogin(false)} style={{width:"100%",padding:12,background:"transparent",border:"none",color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",marginTop:12}}>← 戻る</button>
@@ -478,19 +478,19 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
     setTimeout(()=>genRecipeWithIds(chosenIds,snap),100);
   };
 
-  const btnStyle=(on)=>({flex:1,padding:"9px",background:on?A:"transparent",border:"none",borderRadius:10,color:on?"#fff":MU,fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",transition:"all .2s"});
+  const btnStyle=(on)=>({flex:1,padding:"9px",background:on?A:"transparent",border:"none",color:on?"#fff":MU,borderRadius:10,color:on?"#fff":MU,fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",transition:"all .2s"});
 
   return(
     <div style={{minHeight:"100vh",background:BG,color:TX,fontFamily:"'Syne',sans-serif",paddingBottom:80,maxWidth:480,margin:"0 auto"}}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}::placeholder{color:#3A3835;}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:#2A2927;outline:none}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#FF6B35;cursor:pointer}`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}::placeholder{color:#D4B090;}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.3)}input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:#F0E0D0;outline:none}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#E8704A;cursor:pointer}`}</style>
 
       {/* Header */}
-      <div style={{padding:"18px 20px 14px",borderBottom:"1px solid #2A2927",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative"}}>
+      <div style={{padding:"18px 20px 14px",borderBottom:"1px solid #F0D8C0",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative"}}>
         <div>
           <div style={{display:"flex",alignItems:"baseline",gap:8}}>
             <span style={{fontSize:22,fontWeight:800,letterSpacing:-1,color:A}}>ひとり</span>
             <span style={{fontSize:22,fontWeight:800,letterSpacing:-1}}>めし</span>
-            {IS_BETA&&<span onClick={()=>setShowChangelog(true)} style={{fontSize:10,color:YW,background:YW+"22",border:"1px solid "+YW+"44",padding:"2px 7px",borderRadius:10,cursor:"pointer",letterSpacing:.5}}>β {BETA_VERSION}</span>}
+            {IS_BETA&&<span onClick={()=>setShowChangelog(true)} style={{fontSize:10,color:"#8A5C0A",background:"#FFF0D0",border:"1px solid #E8C070",padding:"2px 7px",borderRadius:10,cursor:"pointer",letterSpacing:.5}}>β {BETA_VERSION}</span>}
           </div>
           {monthSaved.amount>0&&(
             <div style={{fontSize:11,color:GN,marginTop:2,fontFamily:"'Noto Sans JP',sans-serif"}}>
@@ -505,7 +505,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
           </button>
         </div>
         {menuOpen&&(
-          <div style={{position:"absolute",top:"100%",right:16,zIndex:100,background:CD,border:"1px solid #3A3835",borderRadius:12,padding:8,minWidth:160,animation:"slideDown .2s ease",boxShadow:"0 8px 32px rgba(0,0,0,.5)"}}>
+          <div style={{position:"absolute",top:"100%",right:16,zIndex:100,background:SF,border:"1px solid #E8C8A0",borderRadius:12,padding:8,minWidth:160,animation:"slideDown .2s ease",boxShadow:"0 8px 32px rgba(0,0,0,.5)"}}>
             {[{label:"⚙️ レシピ設定",fn:()=>{setShowSettings(true);setMenuOpen(false);}},{label:"🚪 ログアウト",fn:()=>{signOut(auth);setMenuOpen(false);}},{label:"🗑 冷蔵庫をリセット",fn:()=>{setShowReset(true);setMenuOpen(false);},danger:true}].map((item,i)=>(
               <button key={i} onClick={item.fn} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"10px 12px",background:"none",border:"none",color:item.danger?RD:TX,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",borderRadius:8,cursor:"pointer",textAlign:"left"}}>{item.label}</button>
             ))}
@@ -555,16 +555,16 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
               {sorted.map(it=>{
                 const s=selIds.has(it.id),d=daysTo(it.expiry),c=ec(d);
                 return(
-                  <div key={it.id} onClick={()=>{const ns=new Set(selIds);ns.has(it.id)?ns.delete(it.id):ns.add(it.id);setSelIds(ns);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:s?CD:SF,borderRadius:12,marginBottom:8,border:"1px solid "+(s?A:"#2A2927"),cursor:"pointer",transition:"all .15s"}}>
-                    <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(s?A:"#3A3835"),background:s?A:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:12,color:"#fff",transition:"all .15s"}}>{s?"✓":""}</div>
+                  <div key={it.id} onClick={()=>{const ns=new Set(selIds);ns.has(it.id)?ns.delete(it.id):ns.add(it.id);setSelIds(ns);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:s?CD:SF,borderRadius:12,marginBottom:8,border:"1px solid "+(s?A:"#F0E0D0"),cursor:"pointer",transition:"all .15s"}}>
+                    <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(s?A:"#E8D0B8"),background:s?A:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:12,color:"#fff",transition:"all .15s"}}>{s?"✓":""}</div>
                     <p style={{flex:1,fontSize:14,fontFamily:"'Noto Sans JP',sans-serif"}}>{it.name}{it.qty>1&&<span style={{fontSize:12,color:MU,marginLeft:6}}>×{it.qty}</span>}</p>
                     <span style={{fontSize:11,color:c,background:c+"22",padding:"2px 8px",borderRadius:20}}>{el(d)}</span>
                   </div>
                 );
               })}
               <button onClick={genRecipe} disabled={selIds.size===0||generating}
-                style={{width:"100%",padding:15,marginTop:8,background:selIds.size===0||generating?"#2A2927":A,color:selIds.size===0||generating?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:selIds.size===0||generating?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"all .2s"}}>
-                {generating?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>レシピを考え中…</>:`🍳 ${selIds.size}品でレシピを作る`}
+                style={{width:"100%",padding:15,marginTop:8,background:selIds.size===0||generating?"#F0E0D0":A,color:selIds.size===0||generating?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:selIds.size===0||generating?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"all .2s"}}>
+                {generating?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.5)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>レシピを考え中…</>:`🍳 ${selIds.size}品でレシピを作る`}
               </button>
               {recipeErr&&(
                 <div style={{marginTop:8}}>
@@ -578,7 +578,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
           {/* レシピ結果 */}
           {recipe&&(
             <div style={{marginTop:20,animation:"fadeUp .4s ease"}}>
-              <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #2E2D2B",marginBottom:8}}>
+              <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #E8C8A0",marginBottom:8}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div style={{fontSize:32,marginBottom:6}}>{recipe.emoji}</div>
                   <button onClick={()=>toggleFavorite(recipe)} style={{background:"none",border:"none",fontSize:24,cursor:"pointer",padding:4}}>{favorites.find(f=>f.name===recipe.name)?"❤️":"🤍"}</button>
@@ -599,7 +599,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                         const saved=c.price-cost;
                         return(
                           <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderTop:"1px solid #2A2927"}}>
-                            <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif"}}>{c.label} <span style={{color:"#555"}}>¥{c.price}</span></span>
+                            <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif"}}>{c.label} <span style={{color:"#C4956A"}}>¥{c.price}</span></span>
                             <span style={{fontSize:13,fontWeight:700,color:saved>0?GN:MU}}>{saved>0?`¥${saved} お得`:"±0"}</span>
                           </div>
                         );
@@ -627,7 +627,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                 ))}
               </div>
 
-              <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #2E2D2B",marginBottom:8}}>
+              <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #E8C8A0",marginBottom:8}}>
                 {recipeTab==="作り方"&&(
                   <div>
                     {(recipe.steps||[]).map((s,i)=>(
@@ -645,7 +645,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                     {[{l:"カロリー",v:recipe.calories,m:800,c:A},{l:"タンパク質",v:recipe.protein,m:60,c:GN},{l:"炭水化物",v:recipe.carbs,m:100,c:BL},{l:"脂質",v:recipe.fat,m:50,c:YW}].map((n,i)=>(
                       <div key={i} style={{marginBottom:12}}>
                         <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:12,color:MU}}>{n.l}</span><span style={{fontSize:12,color:TX}}>{n.v}</span></div>
-                        <div style={{height:4,background:"#2A2927",borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:Math.min((parseInt(n.v)/n.m)*100,100)+"%",background:n.c,borderRadius:2,transition:"width .8s"}}/></div>
+                        <div style={{height:4,background:"#F0E0D0",borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:Math.min((parseInt(n.v)/n.m)*100,100)+"%",background:n.c,borderRadius:2,transition:"width .8s"}}/></div>
                       </div>
                     ))}
                   </div>
@@ -655,8 +655,8 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                     {!recipe.missing?.length?(
                       <div style={{textAlign:"center",padding:"16px 0"}}><p style={{fontSize:22,marginBottom:6}}>✅</p><p style={{color:MU,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif"}}>追加食材なし！</p></div>
                     ):recipe.missing.map((name,i)=>(
-                      <div key={i} onClick={()=>{const s=new Set(shopChk);s.has(i)?s.delete(i):s.add(i);setShopChk(s);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 0",borderBottom:"1px solid #2A2927",cursor:"pointer"}}>
-                        <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(shopChk.has(i)?GN:"#3A3835"),background:shopChk.has(i)?GN:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:11,color:"#fff",transition:"all .2s"}}>{shopChk.has(i)?"✓":""}</div>
+                      <div key={i} onClick={()=>{const s=new Set(shopChk);s.has(i)?s.delete(i):s.add(i);setShopChk(s);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 0",borderBottom:"1px solid #F0D8C0",cursor:"pointer"}}>
+                        <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(shopChk.has(i)?GN:"#E8D0B8"),background:shopChk.has(i)?GN:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:11,color:"#fff",transition:"all .2s"}}>{shopChk.has(i)?"✓":""}</div>
                         <span style={{fontSize:14,fontFamily:"'Noto Sans JP',sans-serif",textDecoration:shopChk.has(i)?"line-through":"none",color:shopChk.has(i)?MU:TX}}>{name}</span>
                       </div>
                     ))}
@@ -671,8 +671,8 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                     <button onClick={confirmCook} style={{flex:2,padding:"14px",background:GN,border:"none",borderRadius:12,color:"#fff",fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
                       ✅ 作った！
                     </button>
-                    <button onClick={nextRecipe} disabled={generating} style={{flex:1,padding:"14px",background:generating?"#2A2927":A,border:"none",borderRadius:12,color:generating?MU:"#fff",fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:generating?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
-                      {generating?<span style={{width:14,height:14,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>:"🔄"}{generating?"":"別のレシピ"}
+                    <button onClick={nextRecipe} disabled={generating} style={{flex:1,padding:"14px",background:generating?"#F0E0D0":A,border:"none",borderRadius:12,color:generating?MU:"#fff",fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:generating?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+                      {generating?<span style={{width:14,height:14,border:"2px solid rgba(255,255,255,.5)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>:"🔄"}{generating?"":"別のレシピ"}
                     </button>
                   </div>
                   <button onClick={cancelCook} style={{width:"100%",padding:"10px",background:"transparent",border:"none",color:MU,fontSize:12,fontFamily:"'Noto Sans JP',sans-serif",cursor:"pointer",opacity:.7}}>
@@ -691,7 +691,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
           {/* スキャン */}
           <div style={{marginBottom:14}}>
             <button onClick={()=>fileRef.current.click()} disabled={scanning}
-              style={{width:"100%",padding:14,background:scanning?"#1A1916":SF,border:"1px dashed "+(scanning?A:"#3A3835"),borderRadius:12,color:TX,fontSize:14,fontWeight:600,fontFamily:"'Syne',sans-serif",cursor:scanning?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+              style={{width:"100%",padding:14,background:scanning?"#FFF8F0":SF,border:"1px dashed "+(scanning?A:"#E8D0B8"),borderRadius:12,color:TX,fontSize:14,fontWeight:600,fontFamily:"'Syne',sans-serif",cursor:scanning?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
               {scanning?<><span style={{width:16,height:16,border:"2px solid #444",borderTopColor:A,borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>AIが解析中</>:<><span style={{fontSize:20}}>📷</span>レシートをスキャンして食材を自動登録</>}
             </button>
             <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={e=>{if(e.target.files[0])scanReceipt(e.target.files[0]);e.target.value="";}}/>
@@ -726,30 +726,30 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
               </div>
               <p style={{fontSize:11,color:MU,marginBottom:10}}>冷蔵庫に追加する食材を選んでください</p>
               {scanData.items.map((it,i)=>(
-                <div key={i} onClick={()=>{const s=new Set(cfmSel);s.has(i)?s.delete(i):s.add(i);setCfmSel(s);}} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid #2A2927",cursor:"pointer"}}>
-                  <div style={{width:18,height:18,borderRadius:5,border:"2px solid "+(cfmSel.has(i)?A:"#3A3835"),background:cfmSel.has(i)?A:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:10,color:"#fff",transition:"all .15s"}}>{cfmSel.has(i)?"✓":""}</div>
+                <div key={i} onClick={()=>{const s=new Set(cfmSel);s.has(i)?s.delete(i):s.add(i);setCfmSel(s);}} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid #F0D8C0",cursor:"pointer"}}>
+                  <div style={{width:18,height:18,borderRadius:5,border:"2px solid "+(cfmSel.has(i)?A:"#E8D0B8"),background:cfmSel.has(i)?A:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:10,color:"#fff",transition:"all .15s"}}>{cfmSel.has(i)?"✓":""}</div>
                   <span style={{flex:1,fontSize:13,fontFamily:"'Noto Sans JP',sans-serif",color:cfmSel.has(i)?TX:MU}}>{it.name}</span>
                   {it.price>0&&<span style={{fontSize:11,color:MU}}>¥{it.price}</span>}
                 </div>
               ))}
               <div style={{display:"flex",gap:8,marginTop:14}}>
                 <button onClick={()=>setScanData(null)} style={{flex:1,padding:10,background:"transparent",border:"1px solid #3A3835",borderRadius:9,color:MU,fontSize:13,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>キャンセル</button>
-                <button onClick={confirmScan} disabled={cfmSel.size===0} style={{flex:2,padding:10,background:cfmSel.size>0?A:"#2A2927",border:"none",borderRadius:9,color:cfmSel.size>0?"#fff":MU,fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:cfmSel.size>0?"pointer":"not-allowed"}}>{cfmSel.size}品を追加する</button>
+                <button onClick={confirmScan} disabled={cfmSel.size===0} style={{flex:2,padding:10,background:cfmSel.size>0?A:"#F0E0D0",border:"none",borderRadius:9,color:cfmSel.size>0?"#fff":MU,fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:cfmSel.size>0?"pointer":"not-allowed"}}>{cfmSel.size}品を追加する</button>
               </div>
             </div>
           )}
 
           {/* 手動追加 */}
-          <button onClick={()=>setManualOpen(s=>!s)} style={{width:"100%",padding:10,background:"transparent",border:"1px solid #2E2D2B",borderRadius:10,color:MU,fontSize:13,fontFamily:"'Syne',sans-serif",cursor:"pointer",marginBottom:12}}>
+          <button onClick={()=>setManualOpen(s=>!s)} style={{width:"100%",padding:10,background:"transparent",border:"1px solid #E8C8A0",borderRadius:10,color:MU,fontSize:13,fontFamily:"'Syne',sans-serif",cursor:"pointer",marginBottom:12}}>
             {manualOpen?"▲ 閉じる":"+ 手動で食材を追加"}
           </button>
           {manualOpen&&(
-            <div style={{background:SF,borderRadius:12,padding:14,marginBottom:14,border:"1px solid #2E2D2B"}}>
+            <div style={{background:SF,borderRadius:12,padding:14,marginBottom:14,border:"1px solid #E8C8A0"}}>
               <input value={mName} onChange={e=>setMName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addManual()} placeholder="食材名（例: 卵）"
-                style={{width:"100%",background:CD,border:"1px solid #3A3835",borderRadius:8,padding:"10px 12px",color:TX,fontSize:14,outline:"none",fontFamily:"'Noto Sans JP',sans-serif",marginBottom:8}}/>
+                style={{width:"100%",background:SF,border:"1px solid #E8C8A0",borderRadius:8,padding:"10px 12px",color:TX,fontSize:14,outline:"none",fontFamily:"'Noto Sans JP',sans-serif",marginBottom:8}}/>
               <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
                 <label style={{fontSize:12,color:MU,whiteSpace:"nowrap"}}>個数</label>
-                <div style={{display:"flex",alignItems:"center",gap:0,background:CD,border:"1px solid #3A3835",borderRadius:8,overflow:"hidden"}}>
+                <div style={{display:"flex",alignItems:"center",gap:0,background:SF,border:"1px solid #E8C8A0",borderRadius:8,overflow:"hidden"}}>
                   <button onClick={()=>setMQty(q=>Math.max(1,q-1))} style={{width:36,height:36,background:"none",border:"none",color:TX,fontSize:18,cursor:"pointer"}}>−</button>
                   <span style={{minWidth:32,textAlign:"center",fontSize:14,color:TX,fontWeight:700}}>{mQty}</span>
                   <button onClick={()=>setMQty(q=>Math.min(99,q+1))} style={{width:36,height:36,background:"none",border:"none",color:TX,fontSize:18,cursor:"pointer"}}>＋</button>
@@ -758,7 +758,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
               <div style={{display:"flex",gap:8,alignItems:"center"}}>
                 <label style={{fontSize:12,color:MU,whiteSpace:"nowrap"}}>購入日</label>
                 <input type="date" value={mDate} onChange={e=>setMDate(e.target.value)}
-                  style={{flex:1,background:CD,border:"1px solid #3A3835",borderRadius:8,padding:"9px 12px",color:TX,fontSize:13,outline:"none"}}/>
+                  style={{flex:1,background:SF,border:"1px solid #E8C8A0",borderRadius:8,padding:"9px 12px",color:TX,fontSize:13,outline:"none"}}/>
                 <button onClick={addManual} style={{background:A,border:"none",borderRadius:8,padding:"9px 16px",color:"#fff",fontSize:13,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",whiteSpace:"nowrap"}}>追加</button>
               </div>
             </div>
@@ -778,7 +778,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                 const isExpanded=expandedItem===it.id;
                 return(
                   <div key={it.id} style={{position:"relative",marginBottom:8,borderRadius:12,overflow:"hidden"}}>
-                    <div style={{position:"absolute",right:0,top:0,bottom:0,width:80,background:(swipeState[it.id]||0)<-80?RD:"#7A2222",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"0 12px 12px 0",transition:"background .2s"}}>
+                    <div style={{position:"absolute",right:0,top:0,bottom:0,width:80,background:(swipeState[it.id]||0)<-80?RD:"#F5C0C0",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"0 12px 12px 0",transition:"background .2s"}}>
                       <span style={{color:"#fff",fontSize:22}}>🗑</span>
                     </div>
                     <div style={{background:SF,borderRadius:12,border:"1px solid #2A2927",overflow:"hidden",transform:`translateX(${Math.min(0,swipeState[it.id]||0)}px)`,transition:swipeState[it.id]===undefined?"transform .2s":"none",touchAction:"pan-y"}}
@@ -812,7 +812,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                           {/* 個数 */}
                           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
                             <span style={{fontSize:12,color:MU,fontFamily:"'Noto Sans JP',sans-serif",minWidth:48}}>個数</span>
-                            <div style={{display:"flex",alignItems:"center",background:CD,border:"1px solid #3A3835",borderRadius:8,overflow:"hidden"}}>
+                            <div style={{display:"flex",alignItems:"center",background:SF,border:"1px solid #E8C8A0",borderRadius:8,overflow:"hidden"}}>
                               <button onClick={e=>{e.stopPropagation();setFridge(f=>f.map(i=>i.id===it.id?{...i,qty:Math.max(1,i.qty-1)}:i));}} style={{width:32,height:30,background:"none",border:"none",color:TX,fontSize:16,cursor:"pointer"}}>−</button>
                               <span style={{minWidth:28,textAlign:"center",fontSize:13,color:TX,fontWeight:700}}>{it.qty||1}</span>
                               <button onClick={e=>{e.stopPropagation();setFridge(f=>f.map(i=>i.id===it.id?{...i,qty:(i.qty||1)+1}:i));}} style={{width:32,height:30,background:"none",border:"none",color:TX,fontSize:16,cursor:"pointer"}}>＋</button>
@@ -831,7 +831,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                                     else if(s!=="冷凍"&&(i.storage||"冷蔵")==="冷凍"){const rem=daysTo(i.expiry);const d=new Date();d.setDate(d.getDate()+Math.round(rem/5));expiry=d.toISOString().split("T")[0];}
                                     return{...i,storage:s,expiry};
                                   }));
-                                }} style={{flex:1,padding:"5px 4px",background:(it.storage||"冷蔵")===s?A:CD,border:"1px solid "+((it.storage||"冷蔵")===s?A:"#3A3835"),borderRadius:7,color:(it.storage||"冷蔵")===s?"#fff":MU,fontSize:11,cursor:"pointer",fontFamily:"'Syne',sans-serif"}}>
+                                }} style={{flex:1,padding:"5px 4px",background:(it.storage||"冷蔵")===s?A:CD,border:"1px solid "+((it.storage||"冷蔵")===s?A:"#E8D0B8"),borderRadius:7,color:(it.storage||"冷蔵")===s?"#fff":MU,fontSize:11,cursor:"pointer",fontFamily:"'Syne',sans-serif"}}>
                                   {s==="冷蔵"?"🧊 冷蔵":s==="冷凍"?"❄️ 冷凍":"🌡 常温"}
                                 </button>
                               ))}
@@ -843,7 +843,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                             <input type="date" value={editingExpiry?.id===it.id?editingExpiry.expiry:it.expiry}
                               onChange={e=>setEditingExpiry({id:it.id,expiry:e.target.value})}
                               onClick={e=>e.stopPropagation()}
-                              style={{flex:1,background:CD,border:"1px solid #3A3835",borderRadius:8,padding:"7px 10px",color:TX,fontSize:13,outline:"none"}}/>
+                              style={{flex:1,background:SF,border:"1px solid #E8C8A0",borderRadius:8,padding:"7px 10px",color:TX,fontSize:13,outline:"none"}}/>
                             {editingExpiry?.id===it.id&&(
                               <button onClick={e=>{e.stopPropagation();setFridge(prev=>prev.map(i=>i.id===it.id?{...i,expiry:editingExpiry.expiry}:i));setEditingExpiry(null);}}
                                 style={{background:A,border:"none",borderRadius:8,padding:"7px 12px",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer",whiteSpace:"nowrap"}}>保存</button>
@@ -864,12 +864,12 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
 
       {/* 賞味期限アラート */}
       {showExpiryAlert&&expiryAlert.length>0&&(
-        <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
-          <div style={{background:CD,borderRadius:16,padding:24,border:"1px solid "+RD,width:"100%",maxWidth:320,animation:"fadeUp .2s ease"}}>
+        <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(61,36,8,.6)",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+          <div style={{background:CD,borderRadius:16,padding:24,border:"2px solid "+RD,width:"100%",maxWidth:320,animation:"fadeUp .2s ease"}}>
             <p style={{fontSize:16,fontWeight:700,marginBottom:4}}>⚠️ 賞味期限まもなく</p>
             <p style={{fontSize:12,color:MU,marginBottom:16,fontFamily:"'Noto Sans JP',sans-serif"}}>以下の食材の期限が近づいています</p>
             {expiryAlert.map((it,i)=>(
-              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #2A2927"}}>
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #F0D8C0"}}>
                 <span style={{fontSize:14,fontFamily:"'Noto Sans JP',sans-serif"}}>{it.name}</span>
                 <span style={{fontSize:12,fontWeight:700,color:ec(daysTo(it.expiry))}}>{el(daysTo(it.expiry))}</span>
               </div>
@@ -885,7 +885,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
 
       {/* 履歴モーダル */}
       {showHistory&&(
-        <div onClick={()=>setShowHistory(false)} style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+        <div onClick={()=>setShowHistory(false)} style={{position:"fixed",inset:0,zIndex:200,background:"rgba(61,36,8,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
           <div onClick={e=>e.stopPropagation()} style={{background:BG,borderRadius:"20px 20px 0 0",padding:"24px 20px 40px",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .25s ease",maxHeight:"80vh",overflowY:"auto"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
               <span style={{fontSize:15,fontWeight:700}}>📋 履歴 & お気に入り</span>
@@ -938,7 +938,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
 
       {/* 設定モーダル */}
       {showSettings&&(
-        <div onClick={()=>setShowSettings(false)} style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+        <div onClick={()=>setShowSettings(false)} style={{position:"fixed",inset:0,zIndex:200,background:"rgba(61,36,8,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
           <div onClick={e=>e.stopPropagation()} style={{background:BG,borderRadius:"20px 20px 0 0",padding:"24px 20px 40px",width:"100%",maxWidth:480,border:"1px solid #2A2927",animation:"fadeUp .25s ease"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
               <span style={{fontSize:15,fontWeight:700}}>レシピ設定</span>
@@ -962,12 +962,12 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
 
       {/* Changelog Modal */}
       {showChangelog&&(
-        <div onClick={()=>{localStorage.setItem("seenVersion",BETA_VERSION);setShowChangelog(false);}} style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+        <div onClick={()=>{localStorage.setItem("seenVersion",BETA_VERSION);setShowChangelog(false);}} style={{position:"fixed",inset:0,zIndex:300,background:"rgba(61,36,8,.6)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
           <div onClick={e=>e.stopPropagation()} style={{background:BG,borderRadius:"20px 20px 0 0",padding:"24px 20px 40px",width:"100%",maxWidth:480,border:"1px solid "+YW+"44",animation:"fadeUp .25s ease",maxHeight:"85vh",overflowY:"auto"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
               <div>
                 <span style={{fontSize:15,fontWeight:700}}>📋 アップデート情報</span>
-                <span style={{fontSize:11,color:YW,background:YW+"22",border:"1px solid "+YW+"44",padding:"2px 8px",borderRadius:10,marginLeft:8}}>β版</span>
+                <span style={{fontSize:11,color:"#8A5C0A",background:"#FFF0D0",border:"1px solid #E8C070",padding:"2px 8px",borderRadius:10,marginLeft:8}}>β版</span>
               </div>
               <button onClick={()=>{localStorage.setItem("seenVersion",BETA_VERSION);setShowChangelog(false);}} style={{background:"none",border:"none",color:MU,fontSize:22,cursor:"pointer"}}>×</button>
             </div>
@@ -980,7 +980,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
                   <span style={{fontSize:11,color:MU,marginLeft:"auto"}}>{log.date}</span>
                 </div>
                 {log.changes.map((c,ci)=>(
-                  <div key={ci} style={{display:"flex",gap:8,padding:"6px 0",borderBottom:"1px solid #2A2927"}}>
+                  <div key={ci} style={{display:"flex",gap:8,padding:"6px 0",borderBottom:"1px solid #F0D8C0"}}>
                     <span style={{color:li===0?GN:MU,fontSize:12,flexShrink:0}}>•</span>
                     <span style={{fontSize:13,color:li===0?TX:MU,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.5}}>{c}</span>
                   </div>
@@ -997,12 +997,12 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
 
       {/* リセット確認 */}
       {showReset&&(
-        <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
-          <div style={{background:CD,borderRadius:16,padding:24,border:"1px solid #3A3835",width:"100%",maxWidth:320,animation:"fadeUp .2s ease"}}>
+        <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(61,36,8,.5)",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+          <div style={{background:SF,borderRadius:16,padding:24,border:"1px solid #E8C8A0",width:"100%",maxWidth:320,animation:"fadeUp .2s ease"}}>
             <p style={{fontSize:16,fontWeight:700,marginBottom:8}}>冷蔵庫をリセット</p>
             <p style={{fontSize:14,color:MU,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.7,marginBottom:20}}>登録されている食材をすべて削除します。この操作は元に戻せません。</p>
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>setShowReset(false)} style={{flex:1,padding:12,background:SF,border:"1px solid #3A3835",borderRadius:10,fontSize:14,fontWeight:600,color:TX,cursor:"pointer"}}>キャンセル</button>
+              <button onClick={()=>setShowReset(false)} style={{flex:1,padding:12,background:CD,border:"1px solid #E8C8A0",borderRadius:10,fontSize:14,fontWeight:600,color:TX,cursor:"pointer"}}>キャンセル</button>
               <button onClick={()=>{setFridge([]);setSelIds(new Set());setShowReset(false);}} style={{flex:1,padding:12,background:RD,border:"none",borderRadius:10,fontSize:14,fontWeight:700,color:"#fff",cursor:"pointer"}}>削除する</button>
             </div>
           </div>
@@ -1054,13 +1054,13 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}::placeholder{color:#3A3835;}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}`}</style>
 
       {/* Demo Header */}
-      <div style={{padding:"16px 20px 12px",borderBottom:"1px solid #2A2927",display:"flex",justifyContent:"space-between",alignItems:"center",background:BG}}>
+      <div style={{padding:"16px 20px 12px",borderBottom:"1px solid #F0D8C0",display:"flex",justifyContent:"space-between",alignItems:"center",background:BG}}>
         <div>
           <div style={{display:"flex",alignItems:"baseline",gap:6}}>
             <span style={{fontSize:20,fontWeight:800,letterSpacing:-1,color:A}}>ひとり</span>
             <span style={{fontSize:20,fontWeight:800,letterSpacing:-1}}>めし</span>
           </div>
-          <span style={{fontSize:10,color:YW,background:YW+"22",border:"1px solid "+YW+"44",padding:"2px 8px",borderRadius:10,display:"inline-block",marginTop:3}}>✨ 体験モード</span>
+          <span style={{fontSize:10,color:"#8A5C0A",background:"#FFF0D0",border:"1px solid #E8C070",padding:"2px 8px",borderRadius:10,display:"inline-block",marginTop:3}}>✨ 体験モード</span>
         </div>
         <button onClick={onRegister} style={{background:A,border:"none",borderRadius:10,padding:"8px 16px",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:"pointer"}}>
           登録して使う →
@@ -1082,8 +1082,8 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
         {sorted.map(it=>{
           const s=selIds.has(it.id),d=daysTo(it.expiry),c=ec(d);
           return(
-            <div key={it.id} onClick={()=>{const ns=new Set(selIds);ns.has(it.id)?ns.delete(it.id):ns.add(it.id);setSelIds(ns);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:s?CD:SF,borderRadius:12,marginBottom:8,border:"1px solid "+(s?A:"#2A2927"),cursor:"pointer",transition:"all .15s"}}>
-              <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(s?A:"#3A3835"),background:s?A:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:12,color:"#fff",transition:"all .15s"}}>{s?"✓":""}</div>
+            <div key={it.id} onClick={()=>{const ns=new Set(selIds);ns.has(it.id)?ns.delete(it.id):ns.add(it.id);setSelIds(ns);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:s?CD:SF,borderRadius:12,marginBottom:8,border:"1px solid "+(s?A:"#F0E0D0"),cursor:"pointer",transition:"all .15s"}}>
+              <div style={{width:20,height:20,borderRadius:6,border:"2px solid "+(s?A:"#E8D0B8"),background:s?A:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:12,color:"#fff",transition:"all .15s"}}>{s?"✓":""}</div>
               <p style={{flex:1,fontSize:14,fontFamily:"'Noto Sans JP',sans-serif"}}>{it.name}{it.qty>1&&<span style={{fontSize:12,color:MU,marginLeft:6}}>×{it.qty}</span>}</p>
               <span style={{fontSize:11,color:c,background:c+"22",padding:"2px 8px",borderRadius:20}}>{el(d)}</span>
             </div>
@@ -1095,8 +1095,8 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
         </button>
 
         <button onClick={genRecipe} disabled={selIds.size===0||generating}
-          style={{width:"100%",padding:16,background:selIds.size===0||generating?"#2A2927":A,color:selIds.size===0||generating?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:selIds.size===0||generating?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"all .2s",marginBottom:8}}>
-          {generating?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>レシピを考え中…</>:`🍳 ${selIds.size}品でレシピを作る`}
+          style={{width:"100%",padding:16,background:selIds.size===0||generating?"#F0E0D0":A,color:selIds.size===0||generating?MU:"#fff",border:"none",borderRadius:12,fontSize:15,fontWeight:700,fontFamily:"'Syne',sans-serif",cursor:selIds.size===0||generating?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"all .2s",marginBottom:8}}>
+          {generating?<><span style={{width:16,height:16,border:"2px solid rgba(255,255,255,.5)",borderTopColor:"#fff",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/>レシピを考え中…</>:`🍳 ${selIds.size}品でレシピを作る`}
         </button>
 
         {recipeErr&&<p style={{color:RD,fontSize:12,marginBottom:8,lineHeight:1.5}}>{recipeErr}</p>}
@@ -1104,7 +1104,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
         {/* Recipe result */}
         {recipe&&(
           <div style={{marginTop:16,animation:"fadeUp .4s ease"}}>
-            <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #2E2D2B",marginBottom:8}}>
+            <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #E8C8A0",marginBottom:8}}>
               <div style={{fontSize:32,marginBottom:6}}>{recipe.emoji}</div>
               <h2 style={{fontSize:20,fontWeight:800,letterSpacing:-.5}}>{recipe.name}</h2>
               <p style={{fontSize:13,color:MU,marginTop:4,fontFamily:"'Noto Sans JP',sans-serif",lineHeight:1.6}}>{recipe.description}</p>
@@ -1132,7 +1132,7 @@ estimatedCostは食材費の概算（円）を必ず含めること。`;
             </div>
 
             {/* Steps preview */}
-            <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #2E2D2B",marginBottom:12}}>
+            <div style={{background:SF,borderRadius:16,padding:18,border:"1px solid #E8C8A0",marginBottom:12}}>
               <p style={{fontSize:12,color:MU,marginBottom:12,letterSpacing:1}}>作り方</p>
               {(recipe.steps||[]).slice(0,2).map((s,i)=>(
                 <div key={i} style={{display:"flex",gap:12,marginBottom:12}}>
@@ -1170,7 +1170,7 @@ export default function App(){
   const[showSignupFromDemo,setShowSignupFromDemo]=useState(false);
   useEffect(()=>{return onAuthStateChanged(auth,u=>setUser(u));},[]);
 
-  if(user===undefined)return<div style={{minHeight:"100vh",background:"#0F0E0C",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{width:32,height:32,border:"3px solid #333",borderTopColor:"#FF6B35",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/><style>{"@keyframes spin{to{transform:rotate(360deg)}}"}</style></div>;
+  if(user===undefined)return<div style={{minHeight:"100vh",background:"#FFFCF9",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{width:32,height:32,border:"3px solid #F0D8C0",borderTopColor:"#E8704A",borderRadius:"50%",display:"inline-block",animation:"spin .8s linear infinite"}}/><style>{"@keyframes spin{to{transform:rotate(360deg)}}"}</style></div>;
 
   if(user)return<MainApp user={user}/>;
 
